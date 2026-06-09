@@ -221,10 +221,9 @@ cobol-core-banking-system/
 │   └── transactions.dat
 │
 ├── copybooks/
-│   ├── client.cpy
-│   ├── compte.cpy
-│   ├── transaction.cpy
-│   └── status.cpy
+│   ├── CUSTOMER.cpy
+│   ├── ACCOUNT.cpy
+│   ├── TRANSACTION.cpy
 │
 ├── src/
 │   ├── LSTCPT.cbl
