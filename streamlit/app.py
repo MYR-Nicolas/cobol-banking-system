@@ -1,27 +1,393 @@
 import streamlit as st
 
+# =============================================================================
+# STREAMLIT PAGE CONFIGURATION
+# =============================================================================
+
 st.set_page_config(
     page_title="Project Specification - COBOL Core Banking System",
-    layout="wide"
+    layout="wide",
 )
 
-st.title("Project Specification")
-st.subheader("COBOL Core Banking System")
 
-st.info(
-    "Educational project designed to simulate a Mainframe Banking System "
-    "using COBOL, sequential files, copybooks and batch processing."
-)
+# =============================================================================
+# GLOBAL STYLING
+# Defines the visual identity of the Streamlit application.
+# =============================================================================
 
-st.header("1. Context")
+GLOBAL_CSS = """
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
 
-st.write("""
-The purpose of this project is to develop a simplified banking application
-that manages customer accounts and financial operations using COBOL and
-sequential files.
-""")
+.stApp {
+    background:
+        radial-gradient(circle at top left,  rgba(59,130,246,0.08), transparent 28%),
+        radial-gradient(circle at top right, rgba(99,102,241,0.08), transparent 24%),
+        linear-gradient(180deg, #f8fbff 0%, #f6f8fc 45%, #f8fafc 100%);
+}
 
-st.header("2. Project Objectives")
+.main .block-container {
+    max-width: 1340px;
+    padding-top: 1.4rem;
+    padding-bottom: 3rem;
+}
+
+h1, h2, h3 {
+    color: #0f172a;
+    letter-spacing: -0.02em;
+    font-family: 'Inter', sans-serif;
+}
+
+section[data-testid="stSidebar"] {
+    background: linear-gradient(180deg, #f8fbff 0%, #f4f7fb 100%);
+    border-right: 1px solid rgba(226,232,240,0.9);
+}
+
+section[data-testid="stSidebar"] * {
+    color: #1e293b !important;
+}
+
+section[data-testid="stSidebar"] .stButton > button {
+    background: linear-gradient(135deg, #1e3a8a, #2563eb) !important;
+    color: white !important;
+    border: none !important;
+    font-weight: 600 !important;
+    border-radius: 10px !important;
+}
+
+[data-testid="stMetric"] {
+    background: rgba(255,255,255,0.94);
+    border: 1px solid rgba(226,232,240,0.95);
+    border-radius: 16px;
+    padding: 0.8rem 0.9rem;
+    box-shadow: 0 8px 20px rgba(15,23,42,0.05);
+}
+
+div[data-testid="stExpander"] {
+    border-radius: 14px;
+    overflow: hidden;
+    border: 1px solid rgba(191,219,254,0.9);
+}
+
+.hero-box {
+    background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 55%, #2563eb 100%);
+    color: white;
+    border-radius: 24px;
+    padding: 1.6rem 1.6rem 1.4rem 1.6rem;
+    box-shadow: 0 18px 45px rgba(30,58,138,0.22);
+    margin-bottom: 1.2rem;
+}
+
+.section-box {
+    background: rgba(255,255,255,0.90);
+    border: 1px solid rgba(226,232,240,0.95);
+    border-radius: 18px;
+    padding: 1rem 1.1rem;
+    box-shadow: 0 8px 24px rgba(15,23,42,0.05);
+    margin-bottom: 1rem;
+    overflow: hidden;
+}
+
+.badge {
+    display: inline-block;
+    padding: 0.35rem 0.75rem;
+    border-radius: 999px;
+    margin: 0.15rem 0.2rem 0.15rem 0;
+    font-size: 0.82rem;
+    font-weight: 600;
+    background: #eef2ff;
+    color: #3730a3;
+    border: 1px solid #c7d2fe;
+}
+
+.badge-success {
+    background:#ecfdf5;
+    color:#065f46;
+    border:1px solid #a7f3d0;
+}
+
+.badge-error {
+    background:#fef2f2;
+    color:#991b1b;
+    border:1px solid #fecaca;
+}
+
+.badge-warning {
+    background:#fff7ed;
+    color:#9a3412;
+    border:1px solid #fdba74;
+}
+
+.badge-info {
+    background:#eff6ff;
+    color:#1d4ed8;
+    border:1px solid #bfdbfe;
+}
+
+.kpi-grid {
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(160px,1fr));
+    gap:1px;
+    background:rgba(226,232,240,0.9);
+    border:1px solid rgba(226,232,240,0.9);
+    border-radius:18px;
+    overflow:hidden;
+    margin-bottom:1.5rem;
+    box-shadow:0 8px 24px rgba(15,23,42,0.05);
+}
+
+.kpi-cell {
+    background:rgba(255,255,255,0.96);
+    padding:1.3rem 1.5rem;
+}
+
+.kpi-label {
+    font-size:0.68rem;
+    font-weight:700;
+    letter-spacing:0.09em;
+    text-transform:uppercase;
+    color:#94a3b8;
+    margin-bottom:0.5rem;
+}
+
+.kpi-value {
+    font-size:2rem;
+    font-weight:800;
+    color:#0f172a;
+    letter-spacing:-0.04em;
+    line-height:1;
+    font-family:'Inter',sans-serif;
+}
+
+.kpi-value.c-blue {
+    color:#2563eb;
+}
+
+.sec-label {
+    font-size:0.68rem;
+    font-weight:700;
+    letter-spacing:0.10em;
+    text-transform:uppercase;
+    color:#94a3b8;
+    margin:1.8rem 0 0.9rem 0;
+    padding-bottom:0.5rem;
+    border-bottom:1px solid rgba(226,232,240,0.9);
+}
+
+.detail-table {
+    width:100%;
+    border-collapse:collapse;
+    font-size:0.85rem;
+}
+
+.detail-table td {
+    padding:0.65rem 0;
+    border-bottom:1px solid rgba(241,245,249,0.9);
+    color:#374151;
+    vertical-align:top;
+}
+
+.detail-table td:first-child {
+    color:#94a3b8;
+    width:38%;
+    font-size:0.72rem;
+    font-weight:600;
+    text-transform:uppercase;
+    letter-spacing:0.06em;
+}
+
+.detail-table tr:last-child td {
+    border-bottom:none;
+}
+
+.model-row-wrap {
+    border:1px solid rgba(226,232,240,0.9);
+    border-radius:14px;
+    overflow:hidden;
+    background:rgba(255,255,255,0.96);
+    margin-bottom:1rem;
+    box-shadow:0 4px 12px rgba(15,23,42,0.04);
+}
+
+.model-row {
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:0.8rem 1.1rem;
+    border-bottom:1px solid rgba(241,245,249,0.9);
+    gap:1rem;
+}
+
+.model-row:last-child {
+    border-bottom:none;
+}
+
+.model-name {
+    font-family:'JetBrains Mono',monospace;
+    font-size:0.82rem;
+    font-weight:500;
+    color:#1e293b;
+}
+
+.model-type-tag {
+    font-size:0.65rem;
+    font-weight:700;
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+    color:#94a3b8;
+    margin-bottom:0.15rem;
+}
+
+.check-row {
+    display:flex;
+    align-items:flex-start;
+    gap:0.85rem;
+    padding:0.85rem 0;
+    border-bottom:1px solid rgba(241,245,249,0.9);
+}
+
+.check-row:last-child {
+    border-bottom:none;
+}
+
+.check-text {
+    font-size:0.85rem;
+    color:#374151;
+}
+
+.check-text strong {
+    color:#111827;
+    font-weight:600;
+}
+
+.road-pill {
+    display:inline-block;
+    padding:0.25rem 0.65rem;
+    border-radius:999px;
+    font-size:0.72rem;
+    font-weight:700;
+    letter-spacing:0.06em;
+}
+
+.road-todo {
+    background:#eff6ff;
+    color:#1d4ed8;
+    border:1px solid #bfdbfe;
+}
+
+.road-future {
+    background:#f5f3ff;
+    color:#5b21b6;
+    border:1px solid #ddd6fe;
+}
+
+.success-banner {
+    background: linear-gradient(135deg, #ecfdf5, #d1fae5);
+    border: 1px solid #6ee7b7;
+    border-radius: 16px;
+    padding: 1.2rem 1.4rem;
+    color: #065f46;
+    font-size: 0.9rem;
+    line-height: 1.7;
+    margin-top: 1rem;
+}
+</style>
+"""
+
+st.markdown(GLOBAL_CSS, unsafe_allow_html=True)
+
+
+# =============================================================================
+# HERO SECTION
+# Project presentation banner displayed at the top of the page.
+# =============================================================================
+
+st.markdown("""
+<div class="hero-box">
+  <div style="font-size:1.6rem; font-weight:800; letter-spacing:-0.03em; line-height:1.1;">
+    COBOL Core Banking System
+  </div>
+  <div style="font-size:0.85rem; opacity:0.75; margin-top:0.3rem; font-weight:400;">
+    Project Specification - Educational Mainframe Banking Simulation
+  </div>
+  <p style="font-size:0.95rem; opacity:0.9; line-height:1.65; margin:1rem 0 1rem 0;">
+    Educational project designed to simulate a Mainframe Banking System
+    using COBOL, sequential files, copybooks and batch processing.
+  </p>
+  <div>
+    <span class="badge" style="background:rgba(255,255,255,0.12); color:white; border-color:rgba(255,255,255,0.3);">COBOL</span>
+    <span class="badge" style="background:rgba(255,255,255,0.12); color:white; border-color:rgba(255,255,255,0.3);">GnuCOBOL</span>
+    <span class="badge" style="background:rgba(255,255,255,0.12); color:white; border-color:rgba(255,255,255,0.3);">Sequential Files</span>
+    <span class="badge" style="background:rgba(255,255,255,0.12); color:white; border-color:rgba(255,255,255,0.3);">Copybooks</span>
+    <span class="badge" style="background:rgba(255,255,255,0.12); color:white; border-color:rgba(255,255,255,0.3);">Batch Processing</span>
+    <span class="badge" style="background:rgba(255,255,255,0.12); color:white; border-color:rgba(255,255,255,0.3);">JCL Planned</span>
+  </div>
+</div>
+""", unsafe_allow_html=True)
+
+
+# =============================================================================
+# KPI SECTION
+# Displays project statistics and key indicators.
+# =============================================================================
+
+st.markdown("""
+<div class="kpi-grid">
+  <div class="kpi-cell">
+    <div class="kpi-label">Language</div>
+    <div class="kpi-value" style="font-size:1.5rem;">COBOL</div>
+  </div>
+  <div class="kpi-cell">
+    <div class="kpi-label">COBOL Programs</div>
+    <div class="kpi-value c-blue">6</div>
+  </div>
+  <div class="kpi-cell">
+    <div class="kpi-label">Data Files</div>
+    <div class="kpi-value c-blue">3</div>
+  </div>
+  <div class="kpi-cell">
+    <div class="kpi-label">Copybooks</div>
+    <div class="kpi-value c-blue">3</div>
+  </div>
+  <div class="kpi-cell">
+    <div class="kpi-label">Functions</div>
+    <div class="kpi-value c-blue">6</div>
+  </div>
+  <div class="kpi-cell">
+    <div class="kpi-label">Processing</div>
+    <div class="kpi-value" style="font-size:1.2rem;">Batch</div>
+  </div>
+</div>
+""", unsafe_allow_html=True)
+
+
+# =============================================================================
+# SECTION 1 - PROJECT CONTEXT
+# Presents the project objectives and overall business context.
+# =============================================================================
+
+st.markdown('<div class="sec-label">Section 1 - Context</div>', unsafe_allow_html=True)
+
+st.markdown("""
+<div class="section-box">
+  <div style="font-size:1.15rem; font-weight:700; color:#0f172a; margin-bottom:0.4rem;">Project Overview</div>
+  <div style="color:#475569; line-height:1.7;">
+    The purpose of this project is to develop a simplified banking application
+    that manages customer accounts and financial operations using COBOL and
+    sequential files. It serves as a hands-on introduction to mainframe
+    concepts: batch programs, copybooks, structured record layouts, and
+    file-based persistence.
+  </div>
+</div>
+""", unsafe_allow_html=True)
+
+
+# =============================================================================
+# SECTION 2 - PROJECT OBJECTIVES
+# Defines the main business functionalities delivered by the system.
+# =============================================================================
+
+st.markdown('<div class="sec-label">Section 2 - Project Objectives</div>', unsafe_allow_html=True)
 
 objectives = [
     "Consult bank accounts",
@@ -30,274 +396,344 @@ objectives = [
     "Perform transfers",
     "Store transaction history",
     "Generate daily reports",
-    "Simulate batch processing"
+    "Simulate batch processing",
 ]
 
-for obj in objectives:
-    st.markdown(f"- {obj}")
+obj_html = '<div class="model-row-wrap">'
+for text in objectives:
+    obj_html += f"""
+    <div class="model-row">
+      <span class="check-text" style="flex:1;">{text}</span>
+      <span class="badge-info badge">Planned</span>
+    </div>"""
+obj_html += "</div>"
 
-st.header("3. Functional Scope")
+st.markdown(obj_html, unsafe_allow_html=True)
 
-with st.expander("Function 1: Account Consultation", expanded=True):
-    st.write("Search for a bank account using its account number.")
-    st.markdown("**Input:** account number")
-    st.markdown("**Expected output:**")
-    st.code("""
-Account number
-Customer identifier
-Account type
-Balance
-Opening date
-""", language="text")
 
-with st.expander("Function 2: Deposit"):
-    st.write("Credit a bank account.")
-    st.markdown("""
-**Business rules:**
-- The account must exist.
-- The amount must be strictly positive.
+# =============================================================================
+# SECTION 3 - FUNCTIONAL SCOPE
+# Detailed description of all business functions implemented.
+# =============================================================================
 
-**Result:** the account balance is updated and a transaction is created.
-""")
+st.markdown('<div class="sec-label">Section 3 - Functional Scope</div>', unsafe_allow_html=True)
 
-with st.expander("Function 3: Withdrawal"):
-    st.write("Debit a bank account.")
-    st.markdown("""
-**Business rules:**
-- The account must exist.
-- The amount must be strictly positive.
-- The account balance must be sufficient.
+functions = [
+    {
+        "num": "F1",
+        "title": "Account Consultation",
+        "program": "CNSCPT",
+        "desc": "Search for a bank account using its account number.",
+        "rules": [
+            "Input: account number",
+            "Output: account number, customer ID, account type, balance, opening date",
+        ],
+    },
+    {
+        "num": "F2",
+        "title": "Deposit",
+        "program": "DEPOT",
+        "desc": "Credit a bank account.",
+        "rules": [
+            "The account must exist.",
+            "The amount must be strictly positive.",
+            "Result: balance updated and transaction created.",
+        ],
+    },
+    {
+        "num": "F3",
+        "title": "Withdrawal",
+        "program": "RETRAIT",
+        "desc": "Debit a bank account.",
+        "rules": [
+            "The account must exist.",
+            "The amount must be strictly positive.",
+            "The account balance must be sufficient.",
+            "Result: balance updated and transaction created.",
+        ],
+    },
+    {
+        "num": "F4",
+        "title": "Transfer",
+        "program": "VIREMENT",
+        "desc": "Transfer money between two bank accounts.",
+        "rules": [
+            "Source and target accounts must exist.",
+            "Amount must be strictly positive.",
+            "Source account must have sufficient balance.",
+            "Result: source debited, target credited and transaction stored.",
+        ],
+    },
+    {
+        "num": "F5",
+        "title": "Transaction History",
+        "program": "-",
+        "desc": "All accepted banking operations must be recorded in the transaction file.",
+        "rules": [
+            "Types: DEPOSIT, WITHDRAW, TRANSFER",
+        ],
+    },
+    {
+        "num": "F6",
+        "title": "Daily Report",
+        "program": "RAPJOUR",
+        "desc": "Generate a summary report from the transaction file.",
+        "rules": [
+            "Number of accounts",
+            "Number of deposits, withdrawals and transfers",
+            "Total transaction amount",
+        ],
+    },
+]
 
-**Result:** the account balance is updated and a transaction is created.
-""")
+for fn in functions:
+    rules_html = "".join(
+        f"""
+        <div class="check-row">
+          <span style="color:#2563eb;font-weight:700;font-size:0.8rem;">-</span>
+          <span class="check-text">{rule}</span>
+        </div>
+        """
+        for rule in fn["rules"]
+    )
 
-with st.expander("Function 4: Transfer"):
-    st.write("Transfer money between two bank accounts.")
-    st.markdown("""
-**Business rules:**
-- The source account must exist.
-- The target account must exist.
-- The amount must be strictly positive.
-- The source account must have sufficient balance.
+    st.markdown(
+        f"""
+        <div class="section-box" style="margin-bottom:0.75rem;">
+          <div style="display:flex; align-items:center; gap:0.75rem; margin-bottom:0.5rem;">
+            <span style="background:#eef2ff; color:#3730a3; border-radius:8px; padding:0.2rem 0.6rem; font-size:0.75rem; font-weight:800;">{fn["num"]}</span>
+            <span style="font-size:1.05rem; font-weight:700; color:#0f172a;">{fn["title"]}</span>
+            <span style="font-family:'JetBrains Mono',monospace; font-size:0.75rem; color:#94a3b8; margin-left:auto;">{fn["program"]}</span>
+          </div>
+          <div style="color:#475569; font-size:0.88rem; margin-bottom:0.6rem;">{fn["desc"]}</div>
+          {rules_html}
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
 
-**Result:** the source account is debited, the target account is credited and the transaction is stored.
-""")
 
-with st.expander("Function 5: Transaction History"):
-    st.write("All accepted banking operations must be recorded in the transaction file.")
-    st.code("""
-DEPOSIT
-WITHDRAW
-TRANSFER
-""", language="text")
+# =============================================================================
+# SECTION 4 - DATA MODEL
+# Defines file structures and business entities used by the application.
+# =============================================================================
 
-with st.expander("Function 6: Daily Report"):
-    st.write("Generate a summary report from the transaction file.")
-    st.code("""
-Number of accounts
-Number of deposits
-Number of withdrawals
-Number of transfers
-Total transaction amount
-""", language="text")
-
-st.header("4. Data Model")
+st.markdown('<div class="sec-label">Section 4 - Data Model</div>', unsafe_allow_html=True)
 
 col1, col2 = st.columns(2)
 
 with col1:
-    st.subheader("CUSTOMER File")
-
-    st.table({
-        "Field": [
-            "CUST-ID",
-            "CUST-LAST-NAME",
-            "CUST-FIRST-NAME",
-            "CUST-CITY",
-            "CUST-SEGMENT"
-        ],
-        "COBOL Type": [
-            "X(7)",
-            "X(20)",
-            "X(20)",
-            "X(20)",
-            "X(10)"
-        ],
-        "Description": [
-            "Unique customer identifier",
-            "Customer last name",
-            "Customer first name",
-            "Customer city",
-            "Customer segment"
-        ],
-        "Example": [
-            "C000001",
-            "DUPONT",
-            "MARIE",
-            "PARIS",
-            "PREMIUM"
-        ]
-    })
+    st.markdown("""
+    <div class="section-box">
+      <div style="font-size:0.8rem; font-weight:800; text-transform:uppercase; letter-spacing:0.08em; color:#2563eb; margin-bottom:0.5rem;">CUSTOMER File</div>
+      <table class="detail-table">
+        <tr><td>CUST-ID</td><td><code>X(7)</code> - Unique customer identifier <span style="color:#94a3b8">e.g. C000001</span></td></tr>
+        <tr><td>CUST-LAST-NAME</td><td><code>X(20)</code> - Customer last name</td></tr>
+        <tr><td>CUST-FIRST-NAME</td><td><code>X(20)</code> - Customer first name</td></tr>
+        <tr><td>CUST-CITY</td><td><code>X(20)</code> - Customer city</td></tr>
+        <tr><td>CUST-SEGMENT</td><td><code>X(10)</code> - Customer segment <span style="color:#94a3b8">e.g. PREMIUM</span></td></tr>
+      </table>
+    </div>
+    """, unsafe_allow_html=True)
 
 with col2:
-    st.subheader("ACCOUNT File")
-
-    st.table({
-        "Field": [
-            "ACC-NUMBER",
-            "ACC-CUSTOMER-ID",
-            "ACC-TYPE",
-            "ACC-BALANCE",
-            "ACC-OPEN-DATE"
-        ],
-        "COBOL Type": [
-            "X(10)",
-            "X(7)",
-            "X(10)",
-            "9(9)V99",
-            "9(8)"
-        ],
-        "Description": [
-            "Unique bank account number",
-            "Customer identifier linked to the account",
-            "Bank account type",
-            "Account balance with two decimals",
-            "Account opening date in YYYYMMDD format"
-        ],
-        "Example": [
-            "0000000001",
-            "C000001",
-            "COURANT",
-            "00000150050",
-            "20240115"
-        ]
-    })
-
-st.subheader("TRANSACTION File")
-
-st.table({
-    "Field": [
-        "TXN-ID",
-        "TXN-DATE",
-        "TXN-TYPE",
-        "TXN-SOURCE-ACC",
-        "TXN-TARGET-ACC",
-        "TXN-AMOUNT"
-    ],
-    "COBOL Type": [
-        "X(9)",
-        "9(8)",
-        "X(8)",
-        "X(10)",
-        "X(10)",
-        "9(9)V99"
-    ],
-    "Description": [
-        "Unique transaction identifier",
-        "Transaction date in YYYYMMDD format",
-        "Transaction type",
-        "Source or affected account",
-        "Target account for transfers",
-        "Transaction amount with two decimals"
-    ],
-    "Example": [
-        "T00000001",
-        "20260609",
-        "DEPOSIT",
-        "0000000001",
-        "0000000002",
-        "00000010000"
-    ]
-})
-
-st.header("5. Technical Architecture")
-
-st.code("""
-cobol-core-banking-system/
-│
-├── data/
-│   ├── comptes.dat
-│   ├── clients.dat
-│   └── transactions.dat
-│
-├── copybooks/
-│   ├── CUSTOMER.cpy
-│   ├── ACCOUNT.cpy
-│   ├── TRANSACTION.cpy
-│
-├── src/
-│   ├── LSTCPT.cbl
-│   ├── CNSCPT.cbl
-│   ├── DEPOT.cbl
-│   ├── RETRAIT.cbl
-│   ├── VIREMENT.cbl
-│   └── RAPJOUR.cbl
-│
-├── docs/
-│   ├── architecture.md
-│   ├── project-specification.md
-│   └── data-dictionary.md
-│
-└── app.py
-""", language="text")
-
-st.subheader("Planned COBOL Programs")
-
-st.table({
-    "Program": ["LSTCPT", "CNSCPT", "DEPOT", "RETRAIT", "VIREMENT", "RAPJOUR"],
-    "Role": [
-        "List all accounts",
-        "Consult one account",
-        "Perform a deposit",
-        "Perform a withdrawal",
-        "Perform a transfer",
-        "Generate the daily report"
-    ],
-    "Type": ["Batch", "Batch", "Batch", "Batch", "Batch", "Batch"]
-})
-
-st.header("6. Technical Constraints")
+    st.markdown("""
+    <div class="section-box">
+      <div style="font-size:0.8rem; font-weight:800; text-transform:uppercase; letter-spacing:0.08em; color:#2563eb; margin-bottom:0.5rem;">ACCOUNT File</div>
+      <table class="detail-table">
+        <tr><td>ACC-NUMBER</td><td><code>X(10)</code> - Unique bank account number</td></tr>
+        <tr><td>ACC-CUSTOMER-ID</td><td><code>X(7)</code> - Linked customer identifier</td></tr>
+        <tr><td>ACC-TYPE</td><td><code>X(10)</code> - Account type <span style="color:#94a3b8">e.g. COURANT</span></td></tr>
+        <tr><td>ACC-BALANCE</td><td><code>9(9)V99</code> - Balance with two decimals</td></tr>
+        <tr><td>ACC-OPEN-DATE</td><td><code>9(8)</code> - Opening date YYYYMMDD</td></tr>
+      </table>
+    </div>
+    """, unsafe_allow_html=True)
 
 st.markdown("""
-### Main language
-- COBOL
+<div class="section-box">
+  <div style="font-size:0.8rem; font-weight:800; text-transform:uppercase; letter-spacing:0.08em; color:#2563eb; margin-bottom:0.5rem;">TRANSACTION File</div>
+  <table class="detail-table">
+    <tr><td>TXN-ID</td><td><code>X(9)</code> - Unique transaction identifier <span style="color:#94a3b8">e.g. T00000001</span></td></tr>
+    <tr><td>TXN-DATE</td><td><code>9(8)</code> - Transaction date YYYYMMDD</td></tr>
+    <tr><td>TXN-TYPE</td><td><code>X(8)</code> - Type: DEPOSIT / WITHDRAW / TRANSFER</td></tr>
+    <tr><td>TXN-SOURCE-ACC</td><td><code>X(10)</code> - Source or affected account</td></tr>
+    <tr><td>TXN-TARGET-ACC</td><td><code>X(10)</code> - Target account for transfers only</td></tr>
+    <tr><td>TXN-AMOUNT</td><td><code>9(9)V99</code> - Transaction amount with two decimals</td></tr>
+  </table>
+</div>
+""", unsafe_allow_html=True)
 
-### Storage
-- Sequential files
 
-### Development environment
-- VS Code
-- GnuCOBOL
-- Git
-- GitHub
-- Streamlit
+# =============================================================================
+# SECTION 5 - TECHNICAL ARCHITECTURE
+# Presents the physical organization of the project and COBOL components.
+# =============================================================================
 
-### Planned evolutions
-- JCL
-- VSAM
-- DB2
-- CICS
-""")
+st.markdown('<div class="sec-label">Section 5 - Technical Architecture</div>', unsafe_allow_html=True)
 
-st.header("7. Business Rules")
+col_arch, col_prog = st.columns([1, 1])
 
-rules = {
-    "BR01": "An account must exist before it can be consulted.",
-    "BR02": "A deposit amount must be strictly positive.",
-    "BR03": "A withdrawal amount must be strictly positive.",
-    "BR04": "A withdrawal is rejected if the account balance is insufficient.",
-    "BR05": "A transfer requires a valid source account and a valid target account.",
-    "BR06": "The source account of a transfer must have sufficient balance.",
-    "BR07": "Each accepted operation must be recorded in the transaction file.",
-    "BR08": "Business errors must be clearly displayed or written into a dedicated error file."
-}
+with col_arch:
+    st.markdown("""
+    <div class="section-box">
+      <div style="
+        font-size:0.8rem;
+        font-weight:800;
+        text-transform:uppercase;
+        letter-spacing:0.08em;
+        color:#2563eb;
+        margin-bottom:0.75rem;">
+        Project Structure
+      </div>
+    </div>
+    """, unsafe_allow_html=True)
 
-for code, rule in rules.items():
-    st.markdown(f"**{code}**: {rule}")
+    project_structure = """
+cobol-core-banking-system/
+|
+|-- data/
+|   |-- comptes.dat
+|   |-- clients.dat
+|   |-- transactions.dat
+|
+|-- copybooks/
+|   |-- CUSTOMER.cpy
+|   |-- ACCOUNT.cpy
+|   |-- TRANSACTION.cpy
+|
+|-- src/
+|   |-- LSTCPT.cbl
+|   |-- CNSCPT.cbl
+|   |-- DEPOT.cbl
+|   |-- RETRAIT.cbl
+|   |-- VIREMENT.cbl
+|   |-- RAPJOUR.cbl
+|
+|-- docs/
+|   |-- architecture.md
+|   |-- project-specification.md
+|   |-- data-dictionary.md
+|
+|-- app.py
+"""
 
-st.header("8. Success Criteria")
+    st.code(project_structure, language="text")
 
-success = [
+with col_prog:
+    programs = [
+        ("LSTCPT", "List all accounts", "Batch"),
+        ("CNSCPT", "Consult one account", "Batch"),
+        ("DEPOT", "Perform a deposit", "Batch"),
+        ("RETRAIT", "Perform a withdrawal", "Batch"),
+        ("VIREMENT", "Perform a transfer", "Batch"),
+        ("RAPJOUR", "Generate daily report", "Batch"),
+    ]
+
+    rows = ""
+
+    for name, role, ptype in programs:
+        rows += f"""
+        <div class="model-row">
+          <div>
+            <div class="model-type-tag">Program</div>
+            <div class="model-name">{name}.cbl</div>
+          </div>
+          <div style="flex:1; padding:0 1rem; font-size:0.83rem; color:#475569;">{role}</div>
+          <span class="badge">{ptype}</span>
+        </div>"""
+
+    st.markdown(f"""
+    <div class="section-box">
+      <div style="font-size:0.8rem; font-weight:800; text-transform:uppercase; letter-spacing:0.08em; color:#2563eb; margin-bottom:0.75rem;">COBOL Programs</div>
+      <div class="model-row-wrap" style="margin:0;">{rows}</div>
+    </div>
+    """, unsafe_allow_html=True)
+
+
+# =============================================================================
+# SECTION 6 - TECHNICAL CONSTRAINTS
+# Defines the technologies, tools and technical limitations.
+# =============================================================================
+
+st.markdown('<div class="sec-label">Section 6 - Technical Constraints</div>', unsafe_allow_html=True)
+
+col_c1, col_c2 = st.columns(2)
+
+with col_c1:
+    st.markdown("""
+    <div class="section-box">
+      <div style="font-size:0.8rem; font-weight:800; text-transform:uppercase; letter-spacing:0.08em; color:#2563eb; margin-bottom:0.6rem;">Current Stack</div>
+      <table class="detail-table">
+        <tr><td>Language</td><td><span class="badge">COBOL</span></td></tr>
+        <tr><td>Compiler</td><td><span class="badge">GnuCOBOL</span></td></tr>
+        <tr><td>Storage</td><td>Sequential files</td></tr>
+        <tr><td>IDE</td><td>VS Code</td></tr>
+        <tr><td>VCS</td><td>Git / GitHub</td></tr>
+        <tr><td>Dashboard</td><td>Streamlit</td></tr>
+      </table>
+    </div>
+    """, unsafe_allow_html=True)
+
+with col_c2:
+    st.markdown("""
+    <div class="section-box">
+      <div style="font-size:0.8rem; font-weight:800; text-transform:uppercase; letter-spacing:0.08em; color:#7c3aed; margin-bottom:0.6rem;">Planned Evolutions</div>
+      <div style="display:flex; flex-wrap:wrap; gap:0.5rem; margin-top:0.25rem;">
+        <span class="badge" style="background:#f5f3ff; color:#5b21b6; border-color:#ddd6fe;">JCL</span>
+        <span class="badge" style="background:#f5f3ff; color:#5b21b6; border-color:#ddd6fe;">VSAM</span>
+        <span class="badge" style="background:#f5f3ff; color:#5b21b6; border-color:#ddd6fe;">DB2</span>
+        <span class="badge" style="background:#f5f3ff; color:#5b21b6; border-color:#ddd6fe;">CICS</span>
+      </div>
+      <div style="font-size:0.8rem; color:#94a3b8; margin-top:0.8rem; line-height:1.6;">
+        Progressive evolution toward a full mainframe-style architecture,
+        replacing sequential files with VSAM datasets and adding JCL job
+        control for batch scheduling.
+      </div>
+    </div>
+    """, unsafe_allow_html=True)
+
+
+# =============================================================================
+# SECTION 7 - BUSINESS RULES
+# Defines validation rules and banking constraints.
+# =============================================================================
+
+st.markdown('<div class="sec-label">Section 7 - Business Rules</div>', unsafe_allow_html=True)
+
+rules = [
+    ("BR01", "An account must exist before it can be consulted."),
+    ("BR02", "A deposit amount must be strictly positive."),
+    ("BR03", "A withdrawal amount must be strictly positive."),
+    ("BR04", "A withdrawal is rejected if the account balance is insufficient."),
+    ("BR05", "A transfer requires a valid source account and a valid target account."),
+    ("BR06", "The source account of a transfer must have sufficient balance."),
+    ("BR07", "Each accepted operation must be recorded in the transaction file."),
+    ("BR08", "Business errors must be clearly displayed or written into a dedicated error file."),
+]
+
+rules_html = '<div class="model-row-wrap">'
+
+for code, rule in rules:
+    rules_html += f"""
+    <div class="model-row">
+      <span style="font-family:'JetBrains Mono',monospace; font-size:0.75rem; font-weight:700; color:#2563eb; white-space:nowrap;">{code}</span>
+      <span class="check-text" style="flex:1;">{rule}</span>
+    </div>"""
+
+rules_html += "</div>"
+
+st.markdown(rules_html, unsafe_allow_html=True)
+
+
+# =============================================================================
+# SECTION 8 - SUCCESS CRITERIA
+# Defines the acceptance criteria used to validate the project.
+# =============================================================================
+
+st.markdown('<div class="sec-label">Section 8 - Success Criteria</div>', unsafe_allow_html=True)
+
+criteria = [
     "All COBOL programs compile without errors.",
     "Sequential files are correctly read.",
     "Account consultation returns the expected information.",
@@ -306,51 +742,70 @@ success = [
     "Business errors are properly handled.",
     "The daily report is generated.",
     "Copybooks are reused across COBOL programs.",
-    "The project is documented and published on GitHub."
+    "The project is documented and published on GitHub.",
 ]
 
-for item in success:
-    st.markdown(f"- {item}")
+crit_html = '<div class="model-row-wrap">'
 
-st.header("9. Roadmap")
+for criterion in criteria:
+    crit_html += f"""
+    <div class="check-row" style="padding:0.75rem 1.1rem;">
+      <span style="color:#059669; font-size:1rem; flex-shrink:0;">OK</span>
+      <span class="check-text">{criterion}</span>
+    </div>"""
 
-st.table({
-    "Version": [
-        "V1.0",
-        "V1.1",
-        "V1.2",
-        "V1.3",
-        "V1.4",
-        "V1.5",
-        "V2.0",
-        "V3.0"
-    ],
-    "Objective": [
-        "Read account records",
-        "Consult one account",
-        "Deposit processing",
-        "Withdrawal processing",
-        "Transfer processing",
-        "Transaction history and daily report",
-        "Add JCL batch execution",
-        "Evolution toward VSAM and DB2"
-    ],
-    "Status": [
-        "To do",
-        "To do",
-        "To do",
-        "To do",
-        "To do",
-        "To do",
-        "Future",
-        "Future"
-    ]
-})
+crit_html += "</div>"
 
-st.header("10. Portfolio Positioning")
+st.markdown(crit_html, unsafe_allow_html=True)
 
-st.success("""
-This project demonstrates practical skills in COBOL, IBM Z concepts,
-batch processing, sequential file management, copybook design and
-mainframe-oriented application architecture.
-""")
+
+# =============================================================================
+# SECTION 9 - PROJECT ROADMAP
+# Planned evolutions and future milestones.
+# =============================================================================
+
+st.markdown('<div class="sec-label">Section 9 - Roadmap</div>', unsafe_allow_html=True)
+
+roadmap = [
+    ("V1.0", "Read account records", "todo"),
+    ("V1.1", "Consult one account", "todo"),
+    ("V1.2", "Deposit processing", "todo"),
+    ("V1.3", "Withdrawal processing", "todo"),
+    ("V1.4", "Transfer processing", "todo"),
+    ("V1.5", "Transaction history and daily report", "todo"),
+    ("V2.0", "Add JCL batch execution", "future"),
+    ("V3.0", "Evolution toward VSAM and DB2", "future"),
+]
+
+road_html = '<div class="model-row-wrap">'
+
+for version, objective, status in roadmap:
+    pill_class = "road-future" if status == "future" else "road-todo"
+    pill_label = "Future" if status == "future" else "To do"
+
+    road_html += f"""
+    <div class="model-row">
+      <span style="font-family:'JetBrains Mono',monospace; font-size:0.8rem; font-weight:700; color:#0f172a; white-space:nowrap; min-width:3rem;">{version}</span>
+      <span class="check-text" style="flex:1;">{objective}</span>
+      <span class="road-pill {pill_class}">{pill_label}</span>
+    </div>"""
+
+road_html += "</div>"
+
+st.markdown(road_html, unsafe_allow_html=True)
+
+
+# =============================================================================
+# SECTION 10 - PORTFOLIO POSITIONING
+# Highlights the skills demonstrated through this project.
+# =============================================================================
+
+st.markdown('<div class="sec-label">Section 10 - Portfolio Positioning</div>', unsafe_allow_html=True)
+
+st.markdown("""
+<div class="success-banner">
+  This project demonstrates practical skills in <strong>COBOL</strong>,
+  <strong>IBM Z concepts</strong>, batch processing, sequential file management,
+  copybook design and mainframe-oriented application architecture.
+</div>
+""", unsafe_allow_html=True)
