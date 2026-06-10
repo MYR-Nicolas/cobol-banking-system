@@ -1,0 +1,105 @@
+IDENTIFICATION DIVISION.
+PROGRAM-ID. DEPOT.
+
+*> ---------------------------------------
+*> PROGRAM-ID  : DEPOT
+*> AUTHOR      : N-MAYEUR
+*> OBJECT      : Deposit money into an account.
+*> VERSION     : v1.0
+*> ---------------------------------------
+
+ENVIRONMENT DIVISION.
+INPUT-OUTPUT SECTION.
+FILE-CONTROL.
+    SELECT ACCOUNT-FILE
+        ASSIGN TO "data/comptes.dat"
+        ORGANIZATION IS LINE SEQUENTIAL.
+
+    SELECT TEMP-ACCOUNT-FILE
+        ASSIGN TO "data/comptes.tmp"
+        ORGANIZATION IS LINE SEQUENTIAL.
+
+DATA DIVISION.
+FILE SECTION.
+
+FD ACCOUNT-FILE.
+COPY ACCOUNT.
+
+FD TEMP-ACCOUNT-FILE.
+01 TEMP-ACCOUNT-RECORD PIC X(46).
+
+WORKING-STORAGE SECTION.
+
+01 WS-EOF-FLAG        PIC X VALUE 'N'.
+   88 END-OF-FILE     VALUE 'Y'.
+   88 NOT-END         VALUE 'N'.
+
+01 WS-ACCOUNT-SEARCH  PIC X(10).
+
+01 WS-DEPOSIT-AMOUNT  PIC 9(9)V99.
+
+01 WS-FOUND-FLAG      PIC X VALUE 'N'.
+   88 ACCOUNT-FOUND   VALUE 'Y'.
+   88 ACCOUNT-NOT-FOUND VALUE 'N'.
+
+01 WS-VALID-FLAG      PIC X VALUE 'Y'.
+   88 VALID-DATA      VALUE 'Y'.
+   88 INVALID-DATA    VALUE 'N'.
+
+PROCEDURE DIVISION.
+
+MAIN-PROCESS.
+
+    DISPLAY "======================================"
+    DISPLAY "          DEPOSIT PROGRAM"
+    DISPLAY "======================================"
+
+    DISPLAY "ENTER ACCOUNT NUMBER: "
+    ACCEPT WS-ACCOUNT-SEARCH
+
+    DISPLAY "ENTER DEPOSIT AMOUNT: "
+    ACCEPT WS-DEPOSIT-AMOUNT
+
+    IF WS-DEPOSIT-AMOUNT <= 0
+        MOVE 'N' TO WS-VALID-FLAG
+        DISPLAY "INVALID AMOUNT"
+    END-IF
+
+    IF VALID-DATA
+
+        OPEN INPUT ACCOUNT-FILE
+        OPEN OUTPUT TEMP-ACCOUNT-FILE
+
+        PERFORM UNTIL END-OF-FILE
+            READ ACCOUNT-FILE
+                AT END
+                    MOVE 'Y' TO WS-EOF-FLAG
+                NOT AT END
+                    IF ACC-NUMBER = WS-ACCOUNT-SEARCH
+                        MOVE 'Y' TO WS-FOUND-FLAG
+                        ADD WS-DEPOSIT-AMOUNT TO ACC-BALANCE
+                        DISPLAY "DEPOSIT ACCEPTED"
+                        DISPLAY "NEW BALANCE: " ACC-BALANCE
+                    END-IF
+
+                    WRITE TEMP-ACCOUNT-RECORD FROM ACCOUNT-RECORD
+            END-READ
+        END-PERFORM
+
+        CLOSE ACCOUNT-FILE
+        CLOSE TEMP-ACCOUNT-FILE
+
+        IF ACCOUNT-NOT-FOUND
+            DISPLAY "ACCOUNT NOT FOUND: " WS-ACCOUNT-SEARCH
+            DISPLAY "TEMP FILE CREATED WITHOUT UPDATE"
+        ELSE
+            DISPLAY "ACCOUNT FILE UPDATED IN data/comptes.tmp"
+        END-IF
+
+    END-IF
+
+    DISPLAY "======================================"
+    DISPLAY "END OF PROCESSING"
+    DISPLAY "======================================"
+
+    STOP RUN.

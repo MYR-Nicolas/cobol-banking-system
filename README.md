@@ -95,3 +95,6 @@ Génération d'un rapport de synthèse des opérations.
 
 
 
+Commande bash : 
+cobc -x -free -I copybooks src/CNSCPT.cbl -o bin/CNSCPT
+./bin/CNSCPT
