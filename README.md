@@ -95,6 +95,23 @@ Génération d'un rapport de synthèse des opérations.
 
 
 
-Commande bash : 
-cobc -x -free -I copybooks src/CNSCPT.cbl -o bin/CNSCPT
-./bin/CNSCPT
+Commande bash :
+
+Vérification de la syntaxe:
+
+cobc -fsyntax-only -Wall -I copybooks src/LSTCPT.cbl
+cobc -fsyntax-only -Wall -I copybooks src/CNSCPT.cbl
+cobc -fsyntax-only -Wall -I copybooks src/DEPOT.cbl
+
+
+Compilation : 
+
+cobc -x -Wall -I copybooks src/LSTCPT.cbl
+cobc -x -Wall -I copybooks src/CNSCPT.cbl
+cobc -x -Wall -I copybooks src/DEPOT.cbl
+
+Exécuter :
+
+./LSTCPT
+./CNSCPT
+./DEPOT

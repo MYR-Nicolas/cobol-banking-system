@@ -4,3 +4,4 @@
            05 CUST-FIRST-NAME    PIC X(20).
            05 CUST-CITY          PIC X(20).
            05 CUST-SEGMENT       PIC X(10).
+           

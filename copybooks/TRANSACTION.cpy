@@ -5,3 +5,4 @@
            05 TXN-SOURCE-ACC     PIC X(10).
            05 TXN-TARGET-ACC     PIC X(10).
            05 TXN-AMOUNT         PIC 9(9)V99.
+           
