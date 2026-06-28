@@ -21,29 +21,33 @@
            COPY ACCOUNT.
 
        WORKING-STORAGE SECTION.
-       01 WS-EOF-FLAG PIC X VALUE 'N'.
-           88 END-OF-FILE VALUE 'Y'.
-           88 NOT-END VALUE 'N'.
+       01 WS-EOF-FLAG PIC X        VALUE 'N'.
+           88 END-OF-FILE          VALUE 'Y'.
+           88 NOT-END              VALUE 'N'.
 
-       01 WS-ACCOUNT-SEARCH PIC X(10).
-       01 WS-FOUND-FLAG PIC X VALUE 'N'.
-           88 ACCOUNT-FOUND VALUE 'Y'.
-           88 ACCOUNT-NOT-FOUND VALUE 'N'.
+       01 WS-ACCOUNT-SEARCH        PIC X(10).
+       01 WS-FOUND-FLAG            PIC X VALUE 'N'.
+           88 ACCOUNT-FOUND        VALUE 'Y'.
+           88 ACCOUNT-NOT-FOUND    VALUE 'N'.
 
        PROCEDURE DIVISION.
 
        0000-MAIN-PROCESS.
+
            PERFORM 1000-INITIALIZE
            PERFORM 2000-GET-INPUT
            PERFORM 3000-PROCESS-FILE
            PERFORM 5000-END-PROGRAMME
+           
            STOP RUN.
 
        1000-INITIALIZE.
+
            MOVE 'N' TO WS-EOF-FLAG
            MOVE 'N' TO WS-FOUND-FLAG.
 
        2000-GET-INPUT.
+
            DISPLAY "======================================"
            DISPLAY "      ACCOUNT CONSULTATION PROGRAM"
            DISPLAY "======================================"
@@ -51,6 +55,7 @@
            ACCEPT WS-ACCOUNT-SEARCH.
 
        3000-PROCESS-FILE.
+
            OPEN INPUT ACCOUNT-FILE
 
            PERFORM UNTIL END-OF-FILE OR ACCOUNT-FOUND
@@ -72,6 +77,7 @@
            END-IF.
 
         4000-DISPLAY-ACC.
+
            DISPLAY "----------------------------"
            DISPLAY "ACCOUNT : " ACC-NUMBER
            DISPLAY "CUSTOMER: " ACC-CUSTOMER-ID
@@ -80,6 +86,7 @@
            DISPLAY "OPEN DT : " ACC-OPEN-DATE.
 
         5000-END-PROGRAMME.
+
            DISPLAY "======================================"
            DISPLAY "END OF PROCESSING"
            DISPLAY "======================================".
