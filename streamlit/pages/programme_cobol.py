@@ -110,6 +110,13 @@ GLOBAL_CSS = """
     margin-bottom: 0.25rem;
 }
 
+.program-path {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.78rem;
+    color: #94a3b8;
+    margin-bottom: 0.5rem;
+}
+
 .program-description {
     color: #64748b;
     font-size: 0.9rem;
@@ -137,6 +144,12 @@ GLOBAL_CSS = """
     background: #eff6ff;
     color: #1d4ed8;
     border: 1px solid #bfdbfe;
+}
+
+.badge-cics {
+    background: #fdf4ff;
+    color: #86198f;
+    border: 1px solid #f5d0fe;
 }
 
 .badge-created {
@@ -174,6 +187,9 @@ st.markdown(GLOBAL_CSS, unsafe_allow_html=True)
 # Catalog of COBOL programs included in the project.
 # Each program is displayed with its title, file name, type, source path,
 # business description and implementation status.
+#
+# Source files are organized under src/BATCH/ and src/CICS/ depending on
+# whether the program runs as a batch job or as an online CICS transaction.
 # =============================================================================
 
 PROGRAMS = [
@@ -181,49 +197,49 @@ PROGRAMS = [
         "title": "LSTCPT - List Accounts",
         "filename": "LSTCPT.cbl",
         "type": "Batch",
-        "path": "src/LSTCPT.cbl",
+        "path": "src/BATCH/LSTCPT.cbl",
         "description": "Reads the account file and displays all bank accounts stored in the system.",
     },
     {
         "title": "CNSCPT - Consult Account",
         "filename": "CNSCPT.cbl",
-        "type": "Batch",
-        "path": "src/CNSCPT.cbl",
+        "type": "CICS",
+        "path": "src/CICS/CNSCPT.cbl",
         "description": "Searches one bank account by account number and displays detailed account information.",
     },
     {
         "title": "DEPOT - Deposit",
         "filename": "DEPOT.cbl",
-        "type": "Batch",
-        "path": "src/DEPOT.cbl",
+        "type": "CICS",
+        "path": "src/CICS/DEPOT.cbl",
         "description": "Credits an existing bank account and records the deposit transaction.",
     },
     {
         "title": "RETRAIT - Withdrawal",
         "filename": "RETRAIT.cbl",
-        "type": "Batch",
-        "path": "src/RETRAIT.cbl",
+        "type": "CICS",
+        "path": "src/CICS/RETRAIT.cbl",
         "description": "Debits an account after checking that the balance is sufficient.",
     },
     {
         "title": "VIREMENT - Transfer",
         "filename": "VIREMENT.cbl",
-        "type": "Batch",
-        "path": "src/VIREMENT.cbl",
+        "type": "CICS",
+        "path": "src/CICS/VIREMENT.cbl",
         "description": "Transfers an amount from a source account to a target account.",
     },
     {
         "title": "RAPJOUR - Daily Report",
         "filename": "RAPJOUR.cbl",
         "type": "Batch",
-        "path": "src/RAPJOUR.cbl",
+        "path": "src/BATCH/RAPJOUR.cbl",
         "description": "Reads the transaction file and generates a daily banking activity report.",
     },
     {
         "title": "INITBANQ - Initialize Banking Files",
         "filename": "INITBANQ.cbl",
         "type": "Batch",
-        "path": "src/INITBANQ.cbl",
+        "path": "src/BATCH/INITBANQ.cbl",
         "description": "Initializes or prepares the banking files used by the COBOL core banking simulation.",
     },
 ]
@@ -266,6 +282,7 @@ def render_program_card(program: dict) -> None:
 
     The card displays:
     - Program title
+    - Source path (src/BATCH/... or src/CICS/...)
     - Business description
     - COBOL file name
     - Program type
@@ -286,16 +303,19 @@ def render_program_card(program: dict) -> None:
 
     file_path, exists, status, status_class = get_program_status(program["path"])
 
+    type_badge_class = "badge-cics" if program["type"] == "CICS" else "badge-type"
+
     # Render the visual documentation card.
     # HTML is rendered through st.markdown with unsafe_allow_html=True.
     st.markdown(
         f"""
         <div class="program-card">
             <div class="program-title">{program["title"]}</div>
+            <div class="program-path">{program["path"]}</div>
             <div class="program-description">{program["description"]}</div>
             <div>
                 <span class="badge badge-file">{program["filename"]}</span>
-                <span class="badge badge-type">{program["type"]}</span>
+                <span class="badge {type_badge_class}">{program["type"]}</span>
                 <span class="badge {status_class}">{status}</span>
             </div>
         </div>
@@ -333,6 +353,28 @@ def count_programs(programs: list[dict]) -> tuple[int, int]:
     return created_count, progress_count
 
 
+def count_by_type(programs: list[dict]) -> tuple[int, int]:
+    """
+    Count programs by execution type.
+
+    Parameters
+    ----------
+    programs : list[dict]
+        List of program metadata dictionaries.
+
+    Returns
+    -------
+    tuple[int, int]
+        - batch_count : Number of Batch programs.
+        - cics_count  : Number of CICS programs.
+    """
+
+    batch_count = sum(1 for program in programs if program["type"] == "Batch")
+    cics_count = sum(1 for program in programs if program["type"] == "CICS")
+
+    return batch_count, cics_count
+
+
 # =============================================================================
 # HERO SECTION
 # Main page banner presenting the purpose of the COBOL programs catalog.
@@ -348,12 +390,14 @@ st.markdown(
             Core Banking System - Source Code Documentation
         </div>
         <p style="font-size:0.95rem; opacity:0.9; line-height:1.7; margin-top:1rem; margin-bottom:1rem;">
-            This page presents the COBOL batch programs created for the banking simulation project.
-            Each program includes its functional role, implementation status and source code preview.
+            This page presents the COBOL programs created for the banking simulation project,
+            organized under src/BATCH and src/CICS. Each program includes its functional role,
+            implementation status and source code preview.
         </p>
         <div>
             <span class="badge" style="background:rgba(255,255,255,0.12); color:white; border-color:rgba(255,255,255,0.3);">COBOL</span>
             <span class="badge" style="background:rgba(255,255,255,0.12); color:white; border-color:rgba(255,255,255,0.3);">Batch Programs</span>
+            <span class="badge" style="background:rgba(255,255,255,0.12); color:white; border-color:rgba(255,255,255,0.3);">CICS Programs</span>
             <span class="badge" style="background:rgba(255,255,255,0.12); color:white; border-color:rgba(255,255,255,0.3);">Sequential Files</span>
             <span class="badge" style="background:rgba(255,255,255,0.12); color:white; border-color:rgba(255,255,255,0.3);">Copybooks</span>
         </div>
@@ -369,6 +413,7 @@ st.markdown(
 # =============================================================================
 
 created_count, progress_count = count_programs(PROGRAMS)
+batch_count, cics_count = count_by_type(PROGRAMS)
 
 st.markdown(
     f"""
@@ -378,16 +423,20 @@ st.markdown(
             <div class="kpi-value">{len(PROGRAMS)}</div>
         </div>
         <div class="kpi-cell">
+            <div class="kpi-label">Batch</div>
+            <div class="kpi-value">{batch_count}</div>
+        </div>
+        <div class="kpi-cell">
+            <div class="kpi-label">CICS</div>
+            <div class="kpi-value">{cics_count}</div>
+        </div>
+        <div class="kpi-cell">
             <div class="kpi-label">Created</div>
             <div class="kpi-value">{created_count}</div>
         </div>
         <div class="kpi-cell">
             <div class="kpi-label">In Progress</div>
             <div class="kpi-value">{progress_count}</div>
-        </div>
-        <div class="kpi-cell">
-            <div class="kpi-label">Execution</div>
-            <div class="kpi-value" style="font-size:1.5rem;">Batch</div>
         </div>
     </div>
     """,

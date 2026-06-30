@@ -124,6 +124,18 @@ div[data-testid="stExpander"] {
     border:1px solid #bfdbfe;
 }
 
+.badge-cics {
+    background:#fdf4ff;
+    color:#86198f;
+    border:1px solid #f5d0fe;
+}
+
+.badge-batch {
+    background:#eef2ff;
+    color:#3730a3;
+    border:1px solid #c7d2fe;
+}
+
 .kpi-grid {
     display:grid;
     grid-template-columns:repeat(auto-fit,minmax(160px,1fr));
@@ -238,6 +250,16 @@ div[data-testid="stExpander"] {
     margin-bottom:0.15rem;
 }
 
+.model-group-label {
+    font-size:0.7rem;
+    font-weight:800;
+    letter-spacing:0.1em;
+    text-transform:uppercase;
+    padding:0.55rem 1.1rem;
+    background:rgba(248,250,252,0.9);
+    border-bottom:1px solid rgba(241,245,249,0.9);
+}
+
 .check-row {
     display:flex;
     align-items:flex-start;
@@ -281,6 +303,12 @@ div[data-testid="stExpander"] {
     border:1px solid #ddd6fe;
 }
 
+.road-done {
+    background:#ecfdf5;
+    color:#065f46;
+    border:1px solid #a7f3d0;
+}
+
 .success-banner {
     background: linear-gradient(135deg, #ecfdf5, #d1fae5);
     border: 1px solid #6ee7b7;
@@ -290,6 +318,27 @@ div[data-testid="stExpander"] {
     font-size: 0.9rem;
     line-height: 1.7;
     margin-top: 1rem;
+}
+
+.test-folder-cell {
+    background:rgba(255,255,255,0.96);
+    border:1px solid rgba(226,232,240,0.9);
+    border-radius:12px;
+    padding:0.85rem 1rem;
+}
+
+.test-folder-name {
+    font-family:'JetBrains Mono',monospace;
+    font-size:0.82rem;
+    font-weight:700;
+    color:#0f172a;
+    margin-bottom:0.25rem;
+}
+
+.test-folder-desc {
+    font-size:0.78rem;
+    color:#64748b;
+    line-height:1.5;
 }
 </style>
 """
@@ -320,7 +369,9 @@ st.markdown("""
     <span class="badge" style="background:rgba(255,255,255,0.12); color:white; border-color:rgba(255,255,255,0.3);">Sequential Files</span>
     <span class="badge" style="background:rgba(255,255,255,0.12); color:white; border-color:rgba(255,255,255,0.3);">Copybooks</span>
     <span class="badge" style="background:rgba(255,255,255,0.12); color:white; border-color:rgba(255,255,255,0.3);">Batch Processing</span>
+    <span class="badge" style="background:rgba(255,255,255,0.12); color:white; border-color:rgba(255,255,255,0.3);">CICS</span>
     <span class="badge" style="background:rgba(255,255,255,0.12); color:white; border-color:rgba(255,255,255,0.3);">JCL Planned</span>
+    <span class="badge" style="background:rgba(255,255,255,0.12); color:white; border-color:rgba(255,255,255,0.3);">Tests Suite</span>
   </div>
 </div>
 """, unsafe_allow_html=True)
@@ -342,6 +393,14 @@ st.markdown("""
     <div class="kpi-value c-blue">6</div>
   </div>
   <div class="kpi-cell">
+    <div class="kpi-label">Batch Programs</div>
+    <div class="kpi-value c-blue">1</div>
+  </div>
+  <div class="kpi-cell">
+    <div class="kpi-label">CICS Programs</div>
+    <div class="kpi-value c-blue">5</div>
+  </div>
+  <div class="kpi-cell">
     <div class="kpi-label">Data Files</div>
     <div class="kpi-value c-blue">3</div>
   </div>
@@ -350,12 +409,8 @@ st.markdown("""
     <div class="kpi-value c-blue">3</div>
   </div>
   <div class="kpi-cell">
-    <div class="kpi-label">Functions</div>
+    <div class="kpi-label">Test Suites</div>
     <div class="kpi-value c-blue">6</div>
-  </div>
-  <div class="kpi-cell">
-    <div class="kpi-label">Processing</div>
-    <div class="kpi-value" style="font-size:1.2rem;">Batch</div>
   </div>
 </div>
 """, unsafe_allow_html=True)
@@ -375,8 +430,8 @@ st.markdown("""
     The purpose of this project is to develop a simplified banking application
     that manages customer accounts and financial operations using COBOL and
     sequential files. It serves as a hands-on introduction to mainframe
-    concepts: batch programs, copybooks, structured record layouts, and
-    file-based persistence.
+    concepts: batch programs, online CICS transactions, copybooks, structured
+    record layouts, and file-based persistence.
   </div>
 </div>
 """, unsafe_allow_html=True)
@@ -397,6 +452,7 @@ objectives = [
     "Store transaction history",
     "Generate daily reports",
     "Simulate batch processing",
+    "Simulate online CICS transactions",
 ]
 
 obj_html = '<div class="model-row-wrap">'
@@ -421,19 +477,32 @@ st.markdown('<div class="sec-label">Section 3 - Functional Scope</div>', unsafe_
 functions = [
     {
         "num": "F1",
+        "title": "Account Listing",
+        "program": "LSTCPT",
+        "mode": "BATCH",
+        "desc": "List all bank accounts from the account file.",
+        "rules": [
+            "Input: account file (full read)",
+            "Output: list of all accounts with their balance",
+        ],
+    },
+    {
+        "num": "F2",
         "title": "Account Consultation",
         "program": "CNSCPT",
-        "desc": "Search for a bank account using its account number.",
+        "mode": "CICS",
+        "desc": "Search for a bank account using its account number, online.",
         "rules": [
             "Input: account number",
             "Output: account number, customer ID, account type, balance, opening date",
         ],
     },
     {
-        "num": "F2",
+        "num": "F3",
         "title": "Deposit",
         "program": "DEPOT",
-        "desc": "Credit a bank account.",
+        "mode": "CICS",
+        "desc": "Credit a bank account, online.",
         "rules": [
             "The account must exist.",
             "The amount must be strictly positive.",
@@ -441,10 +510,11 @@ functions = [
         ],
     },
     {
-        "num": "F3",
+        "num": "F4",
         "title": "Withdrawal",
         "program": "RETRAIT",
-        "desc": "Debit a bank account.",
+        "mode": "CICS",
+        "desc": "Debit a bank account, online.",
         "rules": [
             "The account must exist.",
             "The amount must be strictly positive.",
@@ -453,10 +523,11 @@ functions = [
         ],
     },
     {
-        "num": "F4",
+        "num": "F5",
         "title": "Transfer",
         "program": "VIREMENT",
-        "desc": "Transfer money between two bank accounts.",
+        "mode": "CICS",
+        "desc": "Transfer money between two bank accounts, online.",
         "rules": [
             "Source and target accounts must exist.",
             "Amount must be strictly positive.",
@@ -465,18 +536,10 @@ functions = [
         ],
     },
     {
-        "num": "F5",
-        "title": "Transaction History",
-        "program": "-",
-        "desc": "All accepted banking operations must be recorded in the transaction file.",
-        "rules": [
-            "Types: DEPOSIT, WITHDRAW, TRANSFER",
-        ],
-    },
-    {
         "num": "F6",
         "title": "Daily Report",
         "program": "RAPJOUR",
+        "mode": "CICS",
         "desc": "Generate a summary report from the transaction file.",
         "rules": [
             "Number of accounts",
@@ -485,6 +548,11 @@ functions = [
         ],
     },
 ]
+
+mode_badge = {
+    "BATCH": '<span class="badge badge-batch">BATCH</span>',
+    "CICS": '<span class="badge badge-cics">CICS</span>',
+}
 
 for fn in functions:
     rules_html = "".join(
@@ -504,6 +572,7 @@ for fn in functions:
             <span style="background:#eef2ff; color:#3730a3; border-radius:8px; padding:0.2rem 0.6rem; font-size:0.75rem; font-weight:800;">{fn["num"]}</span>
             <span style="font-size:1.05rem; font-weight:700; color:#0f172a;">{fn["title"]}</span>
             <span style="font-family:'JetBrains Mono',monospace; font-size:0.75rem; color:#94a3b8; margin-left:auto;">{fn["program"]}</span>
+            {mode_badge[fn["mode"]]}
           </div>
           <div style="color:#475569; font-size:0.88rem; margin-bottom:0.6rem;">{fn["desc"]}</div>
           {rules_html}
@@ -603,17 +672,28 @@ cobol-core-banking-system/
 |   |-- TRANSACTION.cpy
 |
 |-- src/
-|   |-- LSTCPT.cbl
-|   |-- CNSCPT.cbl
-|   |-- DEPOT.cbl
-|   |-- RETRAIT.cbl
-|   |-- VIREMENT.cbl
-|   |-- RAPJOUR.cbl
+|   |-- BATCH/
+|   |   |-- LSTCPT.cbl
+|   |
+|   |-- CICS/
+|       |-- CNSCPT.cbl
+|       |-- DEPOT.cbl
+|       |-- RETRAIT.cbl
+|       |-- VIREMENT.cbl
+|       |-- RAPJOUR.cbl
 |
 |-- docs/
 |   |-- architecture.md
 |   |-- project-specification.md
 |   |-- data-dictionary.md
+|
+|-- tests/
+|   |-- functional/
+|   |-- input/
+|   |-- integration/
+|   |-- regression/
+|   |-- robustness/
+|   |-- unit/
 |
 |-- app.py
 """
@@ -622,26 +702,38 @@ cobol-core-banking-system/
 
 with col_prog:
     programs = [
-        ("LSTCPT", "List all accounts", "Batch"),
-        ("CNSCPT", "Consult one account", "Batch"),
-        ("DEPOT", "Perform a deposit", "Batch"),
-        ("RETRAIT", "Perform a withdrawal", "Batch"),
-        ("VIREMENT", "Perform a transfer", "Batch"),
-        ("RAPJOUR", "Generate daily report", "Batch"),
+        ("LSTCPT", "List all accounts", "BATCH"),
+        ("CNSCPT", "Consult one account", "CICS"),
+        ("DEPOT", "Perform a deposit", "CICS"),
+        ("RETRAIT", "Perform a withdrawal", "CICS"),
+        ("VIREMENT", "Perform a transfer", "CICS"),
+        ("RAPJOUR", "Generate daily report", "CICS"),
+    ]
+
+    groups = [
+        ("BATCH", "src/BATCH"),
+        ("CICS", "src/CICS"),
     ]
 
     rows = ""
 
-    for name, role, ptype in programs:
+    for group_key, group_path in groups:
+        group_color = "#3730a3" if group_key == "BATCH" else "#86198f"
         rows += f"""
-        <div class="model-row">
-          <div>
-            <div class="model-type-tag">Program</div>
-            <div class="model-name">{name}.cbl</div>
-          </div>
-          <div style="flex:1; padding:0 1rem; font-size:0.83rem; color:#475569;">{role}</div>
-          <span class="badge">{ptype}</span>
-        </div>"""
+        <div class="model-group-label" style="color:{group_color};">{group_path}</div>"""
+        for name, role, ptype in programs:
+            if ptype != group_key:
+                continue
+            badge_class = "badge-batch" if ptype == "BATCH" else "badge-cics"
+            rows += f"""
+            <div class="model-row">
+              <div>
+                <div class="model-type-tag">Program</div>
+                <div class="model-name">{name}.cbl</div>
+              </div>
+              <div style="flex:1; padding:0 1rem; font-size:0.83rem; color:#475569;">{role}</div>
+              <span class="badge {badge_class}">{ptype}</span>
+            </div>"""
 
     st.markdown(f"""
     <div class="section-box">
@@ -668,9 +760,12 @@ with col_c1:
         <tr><td>Language</td><td><span class="badge">COBOL</span></td></tr>
         <tr><td>Compiler</td><td><span class="badge">GnuCOBOL</span></td></tr>
         <tr><td>Storage</td><td>Sequential files</td></tr>
+        <tr><td>Online</td><td><span class="badge badge-cics">CICS</span> simulated transactions</td></tr>
+        <tr><td>Batch</td><td><span class="badge badge-batch">BATCH</span> jobs</td></tr>
         <tr><td>IDE</td><td>VS Code</td></tr>
         <tr><td>VCS</td><td>Git / GitHub</td></tr>
         <tr><td>Dashboard</td><td>Streamlit</td></tr>
+        <tr><td>Testing</td><td>Shell-script based test suites (tests/)</td></tr>
       </table>
     </div>
     """, unsafe_allow_html=True)
@@ -683,12 +778,12 @@ with col_c2:
         <span class="badge" style="background:#f5f3ff; color:#5b21b6; border-color:#ddd6fe;">JCL</span>
         <span class="badge" style="background:#f5f3ff; color:#5b21b6; border-color:#ddd6fe;">VSAM</span>
         <span class="badge" style="background:#f5f3ff; color:#5b21b6; border-color:#ddd6fe;">DB2</span>
-        <span class="badge" style="background:#f5f3ff; color:#5b21b6; border-color:#ddd6fe;">CICS</span>
       </div>
       <div style="font-size:0.8rem; color:#94a3b8; margin-top:0.8rem; line-height:1.6;">
         Progressive evolution toward a full mainframe-style architecture,
         replacing sequential files with VSAM datasets and adding JCL job
-        control for batch scheduling.
+        control for batch scheduling, alongside the existing CICS
+        online transactions.
       </div>
     </div>
     """, unsafe_allow_html=True)
@@ -742,6 +837,8 @@ criteria = [
     "Business errors are properly handled.",
     "The daily report is generated.",
     "Copybooks are reused across COBOL programs.",
+    "BATCH and CICS programs are organized in dedicated source folders.",
+    "Unit, functional, integration, regression and robustness tests pass.",
     "The project is documented and published on GitHub.",
 ]
 
@@ -767,12 +864,13 @@ st.markdown(crit_html, unsafe_allow_html=True)
 st.markdown('<div class="sec-label">Section 9 - Roadmap</div>', unsafe_allow_html=True)
 
 roadmap = [
-    ("V1.0", "Read account records", "todo"),
-    ("V1.1", "Consult one account", "todo"),
-    ("V1.2", "Deposit processing", "todo"),
-    ("V1.3", "Withdrawal processing", "todo"),
-    ("V1.4", "Transfer processing", "todo"),
-    ("V1.5", "Transaction history and daily report", "todo"),
+    ("V1.0", "Read account records (LSTCPT - BATCH)", "todo"),
+    ("V1.1", "Consult one account (CNSCPT - CICS)", "todo"),
+    ("V1.2", "Deposit processing (DEPOT - CICS)", "todo"),
+    ("V1.3", "Withdrawal processing (RETRAIT - CICS)", "todo"),
+    ("V1.4", "Transfer processing (VIREMENT - CICS)", "todo"),
+    ("V1.5", "Transaction history and daily report (RAPJOUR - CICS)", "todo"),
+    ("V1.6", "Build full test suite (unit/functional/integration/regression/robustness/input)", "todo"),
     ("V2.0", "Add JCL batch execution", "future"),
     ("V3.0", "Evolution toward VSAM and DB2", "future"),
 ]
@@ -805,7 +903,10 @@ st.markdown('<div class="sec-label">Section 10 - Portfolio Positioning</div>', u
 st.markdown("""
 <div class="success-banner">
   This project demonstrates practical skills in <strong>COBOL</strong>,
-  <strong>IBM Z concepts</strong>, batch processing, sequential file management,
-  copybook design and mainframe-oriented application architecture.
+  <strong>IBM Z concepts</strong>, batch and <strong>CICS online</strong>
+  processing, sequential file management, copybook design,
+  mainframe-oriented application architecture, and a rigorous
+  <strong>testing methodology</strong> covering unit, functional,
+  integration, regression, robustness and input validation.
 </div>
 """, unsafe_allow_html=True)
