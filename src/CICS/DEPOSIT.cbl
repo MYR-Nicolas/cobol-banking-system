@@ -12,11 +12,11 @@
        INPUT-OUTPUT SECTION.
        FILE-CONTROL.
            SELECT ACCOUNT-FILE
-               ASSIGN TO "data/comptes.dat"
+               ASSIGN TO "data/accounts_ksds.dat"
                ORGANIZATION IS LINE SEQUENTIAL.
 
            SELECT TEMP-ACCOUNT-FILE
-               ASSIGN TO "data/comptes.tmp"
+               ASSIGN TO "data/accounts_ksds.tmp"
                ORGANIZATION IS LINE SEQUENTIAL.
 
        DATA DIVISION.

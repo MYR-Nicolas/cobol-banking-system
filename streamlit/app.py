@@ -1,4 +1,5 @@
 import streamlit as st
+import textwrap
 
 # =============================================================================
 # STREAMLIT PAGE CONFIGURATION
@@ -478,7 +479,7 @@ functions = [
     {
         "num": "F1",
         "title": "Account Listing",
-        "program": "LSTCPT",
+        "program": "LSTACC",
         "mode": "BATCH",
         "desc": "List all bank accounts from the account file.",
         "rules": [
@@ -489,7 +490,7 @@ functions = [
     {
         "num": "F2",
         "title": "Account Consultation",
-        "program": "CNSCPT",
+        "program": "CNSACC",
         "mode": "CICS",
         "desc": "Search for a bank account using its account number, online.",
         "rules": [
@@ -500,7 +501,7 @@ functions = [
     {
         "num": "F3",
         "title": "Deposit",
-        "program": "DEPOT",
+        "program": "DEPOSIT",
         "mode": "CICS",
         "desc": "Credit a bank account, online.",
         "rules": [
@@ -512,7 +513,7 @@ functions = [
     {
         "num": "F4",
         "title": "Withdrawal",
-        "program": "RETRAIT",
+        "program": "WITHDRAW",
         "mode": "CICS",
         "desc": "Debit a bank account, online.",
         "rules": [
@@ -525,7 +526,7 @@ functions = [
     {
         "num": "F5",
         "title": "Transfer",
-        "program": "VIREMENT",
+        "program": "TRANSFER",
         "mode": "CICS",
         "desc": "Transfer money between two bank accounts, online.",
         "rules": [
@@ -538,12 +539,12 @@ functions = [
     {
         "num": "F6",
         "title": "Daily Report",
-        "program": "RAPJOUR",
-        "mode": "CICS",
+        "program": "DAYRPT",
+        "mode": "BATCH",
         "desc": "Generate a summary report from the transaction file.",
         "rules": [
             "Number of accounts",
-            "Number of deposits, withdrawals and transfers",
+            "Number of deposits, withdrawals, and transfers",
             "Total transaction amount",
         ],
     },
@@ -612,7 +613,7 @@ with col2:
       <table class="detail-table">
         <tr><td>ACC-NUMBER</td><td><code>X(10)</code> - Unique bank account number</td></tr>
         <tr><td>ACC-CUSTOMER-ID</td><td><code>X(7)</code> - Linked customer identifier</td></tr>
-        <tr><td>ACC-TYPE</td><td><code>X(10)</code> - Account type <span style="color:#94a3b8">e.g. COURANT</span></td></tr>
+        <tr><td>ACC-TYPE</td><td><code>X(10)</code> - Account type <span style="color:#94a3b8">e.g. CHECKING</span></td></tr>
         <tr><td>ACC-BALANCE</td><td><code>9(9)V99</code> - Balance with two decimals</td></tr>
         <tr><td>ACC-OPEN-DATE</td><td><code>9(8)</code> - Opening date YYYYMMDD</td></tr>
       </table>
@@ -662,8 +663,8 @@ with col_arch:
 cobol-core-banking-system/
 |
 |-- data/
-|   |-- comptes.dat
-|   |-- clients.dat
+|   |-- accounts.dat
+|   |-- customers.dat
 |   |-- transactions.dat
 |
 |-- copybooks/
@@ -671,20 +672,23 @@ cobol-core-banking-system/
 |   |-- ACCOUNT.cpy
 |   |-- TRANSACTION.cpy
 |
+|-- bank-parameters/
+|     |--RULE-DEPOSIT.cbl
+|
+|-- jcl
 |-- src/
 |   |-- BATCH/
-|   |   |-- LSTCPT.cbl
+|   |   |-- LSTACC.cbl
 |   |
 |   |-- CICS/
-|       |-- CNSCPT.cbl
-|       |-- DEPOT.cbl
-|       |-- RETRAIT.cbl
-|       |-- VIREMENT.cbl
-|       |-- RAPJOUR.cbl
+|       |-- CNSACC.cbl
+|       |-- DEPOSIT.cbl
+|       |-- WITHDRAW.cbl
+|       |-- TRANSFER.cbl
+|       |-- DAYRPT.cbl
 |
 |-- docs/
 |   |-- architecture.md
-|   |-- project-specification.md
 |   |-- data-dictionary.md
 |
 |-- tests/
@@ -702,12 +706,12 @@ cobol-core-banking-system/
 
 with col_prog:
     programs = [
-        ("LSTCPT", "List all accounts", "BATCH"),
-        ("CNSCPT", "Consult one account", "CICS"),
-        ("DEPOT", "Perform a deposit", "CICS"),
-        ("RETRAIT", "Perform a withdrawal", "CICS"),
-        ("VIREMENT", "Perform a transfer", "CICS"),
-        ("RAPJOUR", "Generate daily report", "CICS"),
+        ("LSTACC", "List all accounts", "BATCH"),
+        ("CNSACC", "Consult one account", "CICS"),
+        ("DEPOSIT", "Process a deposit", "CICS"),
+        ("WITHDRAW", "Process a withdrawal", "CICS"),
+        ("TRANSFER", "Process a transfer", "CICS"),
+        ("DAYRPT", "Generate daily report", "BATCH"),
     ]
 
     groups = [
@@ -791,34 +795,241 @@ with col_c2:
 
 # =============================================================================
 # SECTION 7 - BUSINESS RULES
-# Defines validation rules and banking constraints.
+# Defines segment-based validation rules and banking constraints.
 # =============================================================================
 
 st.markdown('<div class="sec-label">Section 7 - Business Rules</div>', unsafe_allow_html=True)
 
-rules = [
-    ("BR01", "An account must exist before it can be consulted."),
-    ("BR02", "A deposit amount must be strictly positive."),
-    ("BR03", "A withdrawal amount must be strictly positive."),
-    ("BR04", "A withdrawal is rejected if the account balance is insufficient."),
-    ("BR05", "A transfer requires a valid source account and a valid target account."),
-    ("BR06", "The source account of a transfer must have sufficient balance."),
-    ("BR07", "Each accepted operation must be recorded in the transaction file."),
-    ("BR08", "Business errors must be clearly displayed or written into a dedicated error file."),
+st.markdown("""
+<div class="section-box">
+  <div style="font-size:1.05rem; font-weight:800; color:#0f172a; margin-bottom:0.45rem;">
+    Segment-Based Banking Rules
+  </div>
+  <div style="color:#475569; line-height:1.7; font-size:0.9rem;">
+    Business rules are based on the customer segment stored in the customer file.
+    The detected segments are <strong>YOUNG</strong>, <strong>STANDARD</strong>,
+    <strong>PREMIUM</strong> and <strong>PRO</strong>. These limits are inspired by
+    realistic retail banking constraints and remain fully parameter-driven for
+    COBOL implementation.
+  </div>
+</div>
+""", unsafe_allow_html=True)
+
+# -----------------------------------------------------------------------------
+# Segment limits
+# -----------------------------------------------------------------------------
+
+segment_limits = [
+    {
+        "segment": "YOUNG",
+        "profile": "Young customer / student",
+        "min_deposit": "10.00",
+        "max_deposit": "2,000.00",
+        "min_withdrawal": "10.00",
+        "max_withdrawal": "300.00",
+        "free_withdrawals": "3",
+        "withdrawal_fee": "1.20",
+        "min_transfer": "1.00",
+        "max_transfer": "1,000.00",
+        "max_balance": "20,000.00",
+    },
+    {
+        "segment": "STANDARD",
+        "profile": "Standard retail customer",
+        "min_deposit": "10.00",
+        "max_deposit": "5,000.00",
+        "min_withdrawal": "10.00",
+        "max_withdrawal": "700.00",
+        "free_withdrawals": "3",
+        "withdrawal_fee": "1.20",
+        "min_transfer": "1.00",
+        "max_transfer": "5,000.00",
+        "max_balance": "100,000.00",
+    },
+    {
+        "segment": "PREMIUM",
+        "profile": "High-value individual customer",
+        "min_deposit": "10.00",
+        "max_deposit": "20,000.00",
+        "min_withdrawal": "10.00",
+        "max_withdrawal": "1,500.00",
+        "free_withdrawals": "Unlimited",
+        "withdrawal_fee": "0.00",
+        "min_transfer": "1.00",
+        "max_transfer": "15,000.00",
+        "max_balance": "500,000.00",
+    },
+    {
+        "segment": "PRO",
+        "profile": "Professional customer",
+        "min_deposit": "10.00",
+        "max_deposit": "50,000.00",
+        "min_withdrawal": "10.00",
+        "max_withdrawal": "3,000.00",
+        "free_withdrawals": "10",
+        "withdrawal_fee": "1.20",
+        "min_transfer": "1.00",
+        "max_transfer": "50,000.00",
+        "max_balance": "1,000,000.00",
+    },
 ]
 
-rules_html = '<div class="model-row-wrap">'
+segment_rows = "".join(
+    f"""<tr>
+<td><strong>{item['segment']}</strong><br><span style="color:#94a3b8; font-size:0.72rem;">{item['profile']}</span></td>
+<td>{item['min_deposit']}</td>
+<td>{item['max_deposit']}</td>
+<td>{item['min_withdrawal']}</td>
+<td>{item['max_withdrawal']}</td>
+<td>{item['free_withdrawals']}</td>
+<td>{item['withdrawal_fee']}</td>
+<td>{item['min_transfer']}</td>
+<td>{item['max_transfer']}</td>
+<td>{item['max_balance']}</td>
+</tr>"""
+    for item in segment_limits
+)
 
-for code, rule in rules:
-    rules_html += f"""
-    <div class="model-row">
-      <span style="font-family:'JetBrains Mono',monospace; font-size:0.75rem; font-weight:700; color:#2563eb; white-space:nowrap;">{code}</span>
-      <span class="check-text" style="flex:1;">{rule}</span>
-    </div>"""
+st.markdown(textwrap.dedent(f"""
+<div class="section-box">
+  <div style="font-size:0.8rem; font-weight:800; text-transform:uppercase; letter-spacing:0.08em; color:#2563eb; margin-bottom:0.65rem;">
+    Segment Parameter Table
+  </div>
+  <div style="overflow-x:auto;">
+    <table class="detail-table">
+      <tr>
+        <td>Segment</td>
+        <td>Min Deposit</td>
+        <td>Max Deposit</td>
+        <td>Min Withdrawal</td>
+        <td>Max Withdrawal</td>
+        <td>Free Withdrawals / Month</td>
+        <td>Withdrawal Fee</td>
+        <td>Min Transfer</td>
+        <td>Max Transfer</td>
+        <td>Max Account Balance</td>
+      </tr>
+      {segment_rows}
+    </table>
+  </div>
+</div>
+""").strip(), unsafe_allow_html=True)
 
-rules_html += "</div>"
+# -----------------------------------------------------------------------------
+# Detailed business rules by domain
+# -----------------------------------------------------------------------------
 
-st.markdown(rules_html, unsafe_allow_html=True)
+business_rule_groups = [
+    (
+        "Customer and Account Consultation",
+        "BR-CUST",
+        "badge-info",
+        [
+            ("001", "The customer must exist in the customer file."),
+            ("002", "The account must exist in the account file."),
+            ("003", "The account customer ID must match an existing customer ID."),
+            ("004", "The entered last name and first name must match the customer linked to the account."),
+            ("005", "The account must be active."),
+            ("006", "The consultation must return the account number, customer ID, account type, balance and opening date."),
+        ],
+    ),
+    (
+        "Deposit",
+        "BR-DEP",
+        "badge-success",
+        [
+            ("001", "The account must exist."),
+            ("002", "The customer linked to the account must exist."),
+            ("003", "The account must be active."),
+            ("004", "The deposit amount must be strictly positive."),
+            ("005", "The deposit amount must have a maximum of two decimal places."),
+            ("006", "The deposit amount must be greater than or equal to the minimum deposit amount defined for the customer segment."),
+            ("007", "The deposit amount must be less than or equal to the maximum deposit amount defined for the customer segment."),
+            ("008", "The new account balance must not exceed the maximum account balance allowed for the customer segment."),
+            ("009", "If all controls are valid, the account balance is increased by the deposit amount."),
+            ("010", "A transaction record of type DEPOSIT must be created."),
+        ],
+    ),
+    (
+        "Withdrawal",
+        "BR-WDR",
+        "badge-warning",
+        [
+            ("001", "The account must exist."),
+            ("002", "The customer linked to the account must exist."),
+            ("003", "The account must be active."),
+            ("004", "The withdrawal amount must be strictly positive."),
+            ("005", "The withdrawal amount must have a maximum of two decimal places."),
+            ("006", "The withdrawal amount must be greater than or equal to the minimum withdrawal amount defined for the customer segment."),
+            ("007", "The withdrawal amount must be less than or equal to the maximum withdrawal amount defined for the customer segment."),
+            ("008", "The number of monthly withdrawals must not exceed the limit defined for the customer segment."),
+            ("009", "If the free withdrawal limit is exceeded, a withdrawal fee is applied."),
+            ("010", "The account balance must be sufficient to cover the withdrawal amount plus any applicable fee."),
+            ("011", "Overdraft is not allowed."),
+            ("012", "If all controls are valid, the account balance is decreased by the withdrawal amount and the fee."),
+            ("013", "A transaction record of type WITHDRAW must be created."),
+        ],
+    ),
+    (
+        "Transfer",
+        "BR-TRF",
+        "badge-cics",
+        [
+            ("001", "The source account must exist."),
+            ("002", "The target account must exist."),
+            ("003", "The source customer must exist."),
+            ("004", "The target customer must exist."),
+            ("005", "Both accounts must be active."),
+            ("006", "The source and target accounts must be different."),
+            ("007", "The transfer amount must be strictly positive."),
+            ("008", "The transfer amount must have a maximum of two decimal places."),
+            ("009", "The transfer amount must be greater than or equal to the minimum transfer amount defined for the source customer segment."),
+            ("010", "The transfer amount must be less than or equal to the maximum transfer amount defined for the source customer segment."),
+            ("011", "The source account balance must be sufficient to cover the transfer amount."),
+            ("012", "The target account balance after transfer must not exceed the maximum balance allowed for the target customer segment."),
+            ("013", "The debit and credit must be processed as one logical operation."),
+            ("014", "If one update fails, the full transfer must be rejected."),
+            ("015", "A transaction record of type TRANSFER must be created."),
+        ],
+    ),
+]
+
+for title, prefix, badge_class, items in business_rule_groups:
+    rows = "".join(
+        f"""<div class="model-row">
+<span style="font-family:'JetBrains Mono',monospace; font-size:0.75rem; font-weight:700; color:#2563eb; white-space:nowrap;">{prefix}-{number}</span>
+<span class="check-text" style="flex:1;">{rule}</span>
+</div>"""
+        for number, rule in items
+    )
+
+    st.markdown(textwrap.dedent(f"""
+    <div class="section-box">
+      <div style="display:flex; align-items:center; gap:0.6rem; margin-bottom:0.65rem;">
+        <div style="font-size:0.95rem; font-weight:800; color:#0f172a;">{title}</div>
+        <span class="badge {badge_class}">{prefix}</span>
+      </div>
+      <div class="model-row-wrap" style="margin:0;">{rows}</div>
+    </div>
+    """).strip(), unsafe_allow_html=True)
+
+# -----------------------------------------------------------------------------
+# COBOL parameter recommendation
+# -----------------------------------------------------------------------------
+
+st.markdown("""
+<div class="section-box">
+  <div style="font-size:0.8rem; font-weight:800; text-transform:uppercase; letter-spacing:0.08em; color:#7c3aed; margin-bottom:0.6rem;">
+    COBOL Implementation Recommendation
+  </div>
+  <div style="color:#475569; line-height:1.7; font-size:0.9rem;">
+    These values should not be hard-coded directly inside transaction programs.
+    They should be centralized in a dedicated parameter copybook or parameter file,
+    for example <code>BANKPARM.cpy</code> or <code>SEGMENT-RULES.cpy</code>, then reused by
+    <code>DEPOSIT</code>, <code>WITHDRAW</code> and <code>TRANSFER</code>.
+  </div>
+</div>
+""", unsafe_allow_html=True)
 
 
 # =============================================================================
@@ -832,7 +1043,7 @@ criteria = [
     "All COBOL programs compile without errors.",
     "Sequential files are correctly read.",
     "Account consultation returns the expected information.",
-    "Balances are correctly updated after deposits, withdrawals and transfers.",
+    "Balances are correctly updated after deposits, withdrawals, and transfers.",
     "Transactions are recorded in transactions.dat.",
     "Business errors are properly handled.",
     "The daily report is generated.",
@@ -864,12 +1075,12 @@ st.markdown(crit_html, unsafe_allow_html=True)
 st.markdown('<div class="sec-label">Section 9 - Roadmap</div>', unsafe_allow_html=True)
 
 roadmap = [
-    ("V1.0", "Read account records (LSTCPT - BATCH)", "todo"),
-    ("V1.1", "Consult one account (CNSCPT - CICS)", "todo"),
-    ("V1.2", "Deposit processing (DEPOT - CICS)", "todo"),
-    ("V1.3", "Withdrawal processing (RETRAIT - CICS)", "todo"),
-    ("V1.4", "Transfer processing (VIREMENT - CICS)", "todo"),
-    ("V1.5", "Transaction history and daily report (RAPJOUR - CICS)", "todo"),
+    ("V1.0", "Read account records (LSTACC - BATCH)", "todo"),
+    ("V1.1", "Consult one account (CNSACC - CICS)", "todo"),
+    ("V1.2", "Deposit processing (DEPOSIT - CICS)", "todo"),
+    ("V1.3", "Withdrawal processing (WITHDRAW - CICS)", "todo"),
+    ("V1.4", "Transfer processing (TRANSFER - CICS)", "todo"),
+    ("V1.5", "Transaction history and daily report (DAYRPT - BATCH)", "todo"),
     ("V1.6", "Build full test suite (unit/functional/integration/regression/robustness/input)", "todo"),
     ("V2.0", "Add JCL batch execution", "future"),
     ("V3.0", "Evolution toward VSAM and DB2", "future"),
