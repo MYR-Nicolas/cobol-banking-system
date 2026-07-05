@@ -341,10 +341,56 @@ div[data-testid="stExpander"] {
     color:#64748b;
     line-height:1.5;
 }
+
+.constraint-warning {
+    background: linear-gradient(135deg, #fff7ed, #fffbeb);
+    border: 1px solid #fdba74;
+    border-left: 6px solid #f97316;
+    border-radius: 16px;
+    padding: 1rem 1.15rem;
+    margin: 0 0 1.1rem 0;
+    box-shadow: 0 8px 22px rgba(249,115,22,0.10);
+}
+
+.constraint-warning-title {
+    color: #9a3412;
+    font-size: 0.82rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 0.35rem;
+}
+
+.constraint-warning-text {
+    color: #7c2d12;
+    font-size: 0.9rem;
+    line-height: 1.65;
+}
+
 </style>
 """
 
 st.markdown(GLOBAL_CSS, unsafe_allow_html=True)
+
+
+
+# =============================================================================
+# IMPLEMENTATION NOTICE
+# Displays a professional warning about the current CICS simulation constraint.
+# =============================================================================
+
+st.markdown("""
+<div class="constraint-warning">
+  <div class="constraint-warning-title">Implementation Notice</div>
+  <div class="constraint-warning-text">
+    CICS-designated programs are currently implemented and executed in
+    <strong>BATCH mode</strong> due to environment and platform constraints.
+    They remain structured as a CICS-oriented simulation and are planned to
+    evolve toward true online transaction processing when a compatible
+    mainframe/CICS runtime is available.
+  </div>
+</div>
+""", unsafe_allow_html=True)
 
 
 # =============================================================================

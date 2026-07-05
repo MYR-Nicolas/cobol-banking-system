@@ -227,8 +227,9 @@ st.markdown("""
   </div>
   <p style="font-size:0.95rem; opacity:0.9; line-height:1.65; margin:1rem 0 1rem 0;">
     This page lists, in chronological order, the major technical evolutions
-    of the project: file migrations, introduction of CICS, DB2, and any
-    future change to the mainframe-style architecture.
+    of the project: file migrations, business rule implementation, program
+    integration, CICS-oriented design, DB2 preparation, and future changes
+    to the mainframe-style architecture.
   </p>
 </div>
 """, unsafe_allow_html=True)
@@ -246,23 +247,26 @@ evolutions = [
         "title": "Migration of sequential files to VSAM KSDS",
         "status": "done",
         "desc": (
-            "Replace the sequential files (comptes.dat, clients.dat, "
+            "Replace the sequential files (accounts.dat, customers.dat, "
             "transactions.dat) with VSAM KSDS datasets to enable direct "
-            "access by key (account number, customer ID) and move closer "
-            "to a realistic mainframe architecture."
+            "key-based access using account numbers, customer IDs and "
+            "transaction identifiers. This evolution brings the project "
+            "closer to a realistic mainframe data architecture."
         ),
         "tags": ["VSAM", "KSDS", "Files", "Direct access"],
     },
     {
-        "title": "Migration from BATCH to CICS for DEPOSIT and WITHDRAWAL",
+        "title": "Business rule creation and integration into COBOL programs",
         "status": "progress",
         "desc": (
-            "Convert the batch programs DEPOT and RETRAIT into CICS "
-            "transactions to enable online (real-time) processing of "
-            "deposits and withdrawals, including BMS screen handling and "
-            "transactional control."
+            "Define, structure and integrate banking business rules directly "
+            "into the COBOL application flow. The current scope covers "
+            "LSTACC, CNSACC and DEPOSIT, with validation logic progressively "
+            "added to improve account listing, account consultation and deposit "
+            "processing. These rules are designed to strengthen data consistency, "
+            "functional control and maintainability across the banking system."
         ),
-        "tags": ["CICS", "DEPOT", "RETRAIT", "Transactional", "BMS"],
+        "tags": ["Business Rules", "LSTACC", "CNSACC", "DEPOSIT", "Validation"],
     },
 ]
 
@@ -307,7 +311,8 @@ timeline_html = '<div class="timeline">' + "".join(items_html) + '</div>'
 st.markdown(timeline_html, unsafe_allow_html=True)
 
 st.markdown(
-    '<div class="empty-note">Future evolutions (DB2, RACF, ISPF, advanced JCL batch...) '
-    'will appear here as they get started.</div>',
+    '<div class="empty-note">Future evolutions such as extended business rules, '
+    'native CICS execution, DB2 integration, RACF security, ISPF usage and advanced '
+    'JCL batch orchestration will appear here as they get started.</div>',
     unsafe_allow_html=True,
 )
