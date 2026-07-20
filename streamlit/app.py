@@ -688,10 +688,10 @@ st.markdown("""
 
 st.markdown('<div class="sec-label">Section 5 - Technical Architecture</div>', unsafe_allow_html=True)
 
-col_arch, col_prog = st.columns([1, 1])
 
-with col_arch:
-    st.markdown("""
+
+
+st.markdown("""
     <div class="section-box">
       <div style="
         font-size:0.8rem;
@@ -705,7 +705,7 @@ with col_arch:
     </div>
     """, unsafe_allow_html=True)
 
-    project_structure = """
+project_structure = """
 cobol-core-banking-system/
 |
 |-- data/
@@ -719,7 +719,11 @@ cobol-core-banking-system/
 |   |-- TRANSACTION.cpy
 |
 |-- bank-parameters/
-|     |--RULE-DEPOSIT.cbl
+|   |-- RULE-ACCOUNT-CTRL.cbl  
+|   |-- RULE-FORMAT.cbl           
+|   |-- RULE-SEGMENT-RANGE.cbl    
+|   |-- RULE-BALANCE.cbl          
+|   |-- RULE-LIMIT.cbl            
 |
 |-- jcl
 |-- src/
@@ -727,10 +731,10 @@ cobol-core-banking-system/
 |   |   |-- LSTACC.cbl
 |   |
 |   |-- CICS/
-|       |-- CNSACC.cbl
-|       |-- DEPOSIT.cbl
-|       |-- WITHDRAW.cbl
-|       |-- TRANSFER.cbl
+|       |-- CNSACC.cbl            -> CALL RULE-ACCOUNT-CTRL
+|       |-- DEPOSIT.cbl           -> CALL RULE-ACCOUNT-CTRL, RULE-FORMAT, RULE-SEGMENT-RANGE, RULE-BALANCE
+|       |-- WITHDRAW.cbl          -> CALL RULE-ACCOUNT-CTRL, RULE-FORMAT, RULE-SEGMENT-RANGE, RULE-LIMIT, RULE-BALANCE
+|       |-- TRANSFER.cbl          -> CALL RULE-ACCOUNT-CTRL (x2), RULE-FORMAT, RULE-SEGMENT-RANGE, RULE-BALANCE
 |       |-- DAYRPT.cbl
 |
 |-- docs/
@@ -748,10 +752,10 @@ cobol-core-banking-system/
 |-- app.py
 """
 
-    st.code(project_structure, language="text")
+st.code(project_structure, language="text")
 
-with col_prog:
-    programs = [
+
+programs = [
         ("LSTACC", "List all accounts", "BATCH"),
         ("CNSACC", "Consult one account", "CICS"),
         ("DEPOSIT", "Process a deposit", "CICS"),
@@ -760,14 +764,14 @@ with col_prog:
         ("DAYRPT", "Generate daily report", "BATCH"),
     ]
 
-    groups = [
+groups = [
         ("BATCH", "src/BATCH"),
         ("CICS", "src/CICS"),
     ]
 
-    rows = ""
+rows = ""
 
-    for group_key, group_path in groups:
+for group_key, group_path in groups:
         group_color = "#3730a3" if group_key == "BATCH" else "#86198f"
         rows += f"""
         <div class="model-group-label" style="color:{group_color};">{group_path}</div>"""
@@ -785,7 +789,7 @@ with col_prog:
               <span class="badge {badge_class}">{ptype}</span>
             </div>"""
 
-    st.markdown(f"""
+st.markdown(f"""
     <div class="section-box">
       <div style="font-size:0.8rem; font-weight:800; text-transform:uppercase; letter-spacing:0.08em; color:#2563eb; margin-bottom:0.75rem;">COBOL Programs</div>
       <div class="model-row-wrap" style="margin:0;">{rows}</div>
