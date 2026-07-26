@@ -657,12 +657,14 @@ with col2:
     <div class="section-box">
       <div style="font-size:0.8rem; font-weight:800; text-transform:uppercase; letter-spacing:0.08em; color:#2563eb; margin-bottom:0.5rem;">ACCOUNT File</div>
       <table class="detail-table">
-        <tr><td>ACC-NUMBER</td><td><code>X(10)</code> - Unique bank account number</td></tr>
+        <tr><td>ACC-NUMBER</td><td><code>X(10)</code> - Unique bank account number <span style="color:#94a3b8">KSDS key</span></td></tr>
         <tr><td>ACC-CUSTOMER-ID</td><td><code>X(7)</code> - Linked customer identifier</td></tr>
-        <tr><td>ACC-TYPE</td><td><code>X(10)</code> - Account type <span style="color:#94a3b8">e.g. CHECKING</span></td></tr>
-        <tr><td>ACC-BALANCE</td><td><code>9(9)V99</code> - Balance with two decimals</td></tr>
+        <tr><td>ACC-TYPE</td><td><code>X(10)</code> - Account type <span style="color:#94a3b8">COURANT / EPARGNE</span></td></tr>
+        <tr><td>ACC-BALANCE</td><td><code>S9(9)V99 COMP-3</code> - Signed balance, packed decimal <span style="color:#94a3b8">6 bytes</span></td></tr>
         <tr><td>ACC-OPEN-DATE</td><td><code>9(8)</code> - Opening date YYYYMMDD</td></tr>
+        <tr><td>ACC-STATUS</td><td><code>X(1)</code> - Account status <span style="color:#94a3b8">A active / S suspended / C closed</span></td></tr>
       </table>
+     
     </div>
     """, unsafe_allow_html=True)
 
