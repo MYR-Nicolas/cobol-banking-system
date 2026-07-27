@@ -3,7 +3,7 @@
       *  PURPOSE   : ACCOUNT MOVEMENT RECORD                           *
       *  TYPE      : RECORD                                            *
       *----------------------------------------------------------------*
-      *  FILE      : TRANSAC             ORGANIZATION : VSAM KSDS      *
+      *  FILE      : TRANSACTION             ORGANIZATION : VSAM KSDS      *
       *  LRECL     : 076                 KEY : TRX-ID POS 1 LEN 9      *
       *----------------------------------------------------------------*
       *  REQUIRES  : NONE                                              *
