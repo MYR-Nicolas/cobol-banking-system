@@ -672,12 +672,13 @@ st.markdown("""
 <div class="section-box">
   <div style="font-size:0.8rem; font-weight:800; text-transform:uppercase; letter-spacing:0.08em; color:#2563eb; margin-bottom:0.5rem;">TRANSACTION File</div>
   <table class="detail-table">
-    <tr><td>TXN-ID</td><td><code>X(9)</code> - Unique transaction identifier <span style="color:#94a3b8">e.g. T00000001</span></td></tr>
-    <tr><td>TXN-DATE</td><td><code>9(8)</code> - Transaction date YYYYMMDD</td></tr>
-    <tr><td>TXN-TYPE</td><td><code>X(8)</code> - Type: DEPOSIT / WITHDRAW / TRANSFER</td></tr>
-    <tr><td>TXN-SOURCE-ACC</td><td><code>X(10)</code> - Source or affected account</td></tr>
-    <tr><td>TXN-TARGET-ACC</td><td><code>X(10)</code> - Target account for transfers only</td></tr>
-    <tr><td>TXN-AMOUNT</td><td><code>9(9)V99</code> - Transaction amount with two decimals</td></tr>
+    <tr><td>TRX-ID</td><td><code>X(9)</code> - Unique transaction identifier <span style="color:#94a3b8">e.g. T00000001 - KSDS key</span></td></tr>
+    <tr><td>TRX-DATE</td><td><code>9(8)</code> - Transaction date YYYYMMDD</td></tr>
+    <tr><td>TRX-TYPE</td><td><code>X(8)</code> - Type <span style="color:#94a3b8">VIREMENT / DEPOT / RETRAIT</span></td></tr>
+    <tr><td>TRX-ACC-FROM</td><td><code>X(10)</code> - Source or affected account</td></tr>
+    <tr><td>TRX-ACC-TO</td><td><code>X(10)</code> - Target account for transfers only</td></tr>
+    <tr><td>TRX-AMOUNT</td><td><code>9(9)V99</code> - Transaction amount with two decimals</td></tr>
+    <tr><td>TRX-BENEFICIARY-NAME</td><td><code>X(20)</code> - Beneficiary surname, captured at transfer time <span style="color:#94a3b8">spaces unless VIREMENT</span></td></tr>
   </table>
 </div>
 """, unsafe_allow_html=True)
