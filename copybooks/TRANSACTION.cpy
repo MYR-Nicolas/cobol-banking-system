@@ -4,7 +4,7 @@
       *  TYPE      : RECORD                                            *
       *----------------------------------------------------------------*
       *  FILE      : TRANSACTION             ORGANIZATION : VSAM KSDS      *
-      *  LRECL     : 076                 KEY : TRX-ID POS 1 LEN 9      *
+      *  LRECL     : 071                 KEY : TRX-ID POS 1 LEN 9      *
       *----------------------------------------------------------------*
       *  REQUIRES  : NONE                                              *
       *  INCLUDE IN: FILE SECTION OR LINKAGE SECTION                   *
