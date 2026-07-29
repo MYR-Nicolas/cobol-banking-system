@@ -4,7 +4,7 @@
       *  TYPE      : RECORD                                            *
       *----------------------------------------------------------------*
       *  FILE      : COMPTES             ORGANIZATION : VSAM KSDS      *
-      *  LRECL     : 047                 KEY : ACC-NUMBER POS 1 LEN 10 *
+      *  LRECL     : 042                 KEY : ACC-NUMBER POS 1 LEN 10 *
       *----------------------------------------------------------------*
       *  REQUIRES  : NONE                                              *
       *  INCLUDE IN: FILE SECTION                                      *
