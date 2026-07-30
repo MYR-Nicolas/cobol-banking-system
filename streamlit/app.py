@@ -846,203 +846,58 @@ with col_c2:
     """, unsafe_allow_html=True)
 
 
-# =============================================================================
-# SECTION 7 - BUSINESS RULES
-# Defines segment-based validation rules and banking constraints.
-# =============================================================================
-
-st.markdown('<div class="sec-label">Section 7 - Business Rules</div>', unsafe_allow_html=True)
-
-st.markdown("""
-<div class="section-box">
-  <div style="font-size:1.05rem; font-weight:800; color:#0f172a; margin-bottom:0.45rem;">
-    Segment-Based Banking Rules
-  </div>
-  <div style="color:#475569; line-height:1.7; font-size:0.9rem;">
-    Business rules are based on the customer segment stored in the customer file.
-    The detected segments are <strong>YOUNG</strong>, <strong>STANDARD</strong>,
-    <strong>PREMIUM</strong> and <strong>PRO</strong>. These limits are inspired by
-    realistic retail banking constraints and remain fully parameter-driven for
-    COBOL implementation.
-  </div>
-</div>
-""", unsafe_allow_html=True)
-
 # -----------------------------------------------------------------------------
-# Segment limits
-# -----------------------------------------------------------------------------
-
-segment_limits = [
-    {
-        "segment": "YOUNG",
-        "profile": "Young customer / student",
-        "min_deposit": "10.00",
-        "max_deposit": "2,000.00",
-        "min_withdrawal": "10.00",
-        "max_withdrawal": "300.00",
-        "free_withdrawals": "3",
-        "withdrawal_fee": "1.20",
-        "min_transfer": "1.00",
-        "max_transfer": "1,000.00",
-        "max_balance": "20,000.00",
-    },
-    {
-        "segment": "STANDARD",
-        "profile": "Standard retail customer",
-        "min_deposit": "10.00",
-        "max_deposit": "5,000.00",
-        "min_withdrawal": "10.00",
-        "max_withdrawal": "700.00",
-        "free_withdrawals": "3",
-        "withdrawal_fee": "1.20",
-        "min_transfer": "1.00",
-        "max_transfer": "5,000.00",
-        "max_balance": "100,000.00",
-    },
-    {
-        "segment": "PREMIUM",
-        "profile": "High-value individual customer",
-        "min_deposit": "10.00",
-        "max_deposit": "20,000.00",
-        "min_withdrawal": "10.00",
-        "max_withdrawal": "1,500.00",
-        "free_withdrawals": "Unlimited",
-        "withdrawal_fee": "0.00",
-        "min_transfer": "1.00",
-        "max_transfer": "15,000.00",
-        "max_balance": "500,000.00",
-    },
-    {
-        "segment": "PRO",
-        "profile": "Professional customer",
-        "min_deposit": "10.00",
-        "max_deposit": "50,000.00",
-        "min_withdrawal": "10.00",
-        "max_withdrawal": "3,000.00",
-        "free_withdrawals": "10",
-        "withdrawal_fee": "1.20",
-        "min_transfer": "1.00",
-        "max_transfer": "50,000.00",
-        "max_balance": "1,000,000.00",
-    },
-]
-
-segment_rows = "".join(
-    f"""<tr>
-<td><strong>{item['segment']}</strong><br><span style="color:#94a3b8; font-size:0.72rem;">{item['profile']}</span></td>
-<td>{item['min_deposit']}</td>
-<td>{item['max_deposit']}</td>
-<td>{item['min_withdrawal']}</td>
-<td>{item['max_withdrawal']}</td>
-<td>{item['free_withdrawals']}</td>
-<td>{item['withdrawal_fee']}</td>
-<td>{item['min_transfer']}</td>
-<td>{item['max_transfer']}</td>
-<td>{item['max_balance']}</td>
-</tr>"""
-    for item in segment_limits
-)
-
-st.markdown(textwrap.dedent(f"""
-<div class="section-box">
-  <div style="font-size:0.8rem; font-weight:800; text-transform:uppercase; letter-spacing:0.08em; color:#2563eb; margin-bottom:0.65rem;">
-    Segment Parameter Table
-  </div>
-  <div style="overflow-x:auto;">
-    <table class="detail-table">
-      <tr>
-        <td>Segment</td>
-        <td>Min Deposit</td>
-        <td>Max Deposit</td>
-        <td>Min Withdrawal</td>
-        <td>Max Withdrawal</td>
-        <td>Free Withdrawals / Month</td>
-        <td>Withdrawal Fee</td>
-        <td>Min Transfer</td>
-        <td>Max Transfer</td>
-        <td>Max Account Balance</td>
-      </tr>
-      {segment_rows}
-    </table>
-  </div>
-</div>
-""").strip(), unsafe_allow_html=True)
-
-# -----------------------------------------------------------------------------
-# Detailed business rules by domain
+# SECTION 7 - Detailed business rules by domain
 # -----------------------------------------------------------------------------
 
 business_rule_groups = [
     (
-        "Customer and Account Consultation",
-        "BR-CUST",
+        "Account & Customer Control",
+        "BR-ACC",
         "badge-info",
         [
-            ("001", "The customer must exist in the customer file."),
-            ("002", "The account must exist in the account file."),
-            ("003", "The account customer ID must match an existing customer ID."),
-            ("004", "The entered last name and first name must match the customer linked to the account."),
-            ("005", "The account must be active."),
-            ("006", "The consultation must return the account number, customer ID, account type, balance and opening date."),
+            ("001", "The account must exist."),
+            ("002", "The customer must exist."),
+            ("003", "The account must be active."),
+            ("004", "The account customer ID must match an existing customer ID."),
+            ("005", "The entered last name and first name must match the customer linked to the account."),
+            ("006", "The source and target accounts must be different."),
         ],
     ),
     (
-        "Deposit",
-        "BR-DEP",
+        "Amount Format",
+        "BR-FMT",
         "badge-success",
         [
-            ("001", "The account must exist."),
-            ("002", "The customer linked to the account must exist."),
-            ("003", "The account must be active."),
-            ("004", "The deposit amount must be strictly positive."),
-            ("005", "The deposit amount must have a maximum of two decimal places."),
-            ("006", "The deposit amount must be greater than or equal to the minimum deposit amount defined for the customer segment."),
-            ("007", "The deposit amount must be less than or equal to the maximum deposit amount defined for the customer segment."),
-            ("008", "The new account balance must not exceed the maximum account balance allowed for the customer segment."),
-            ("009", "If all controls are valid, the account balance is increased by the deposit amount."),
-            ("010", "A transaction record of type DEPOSIT must be created."),
+            ("001", "The amount must be strictly positive."),
+            ("002", "The amount must have a maximum of two decimal places."),
         ],
     ),
     (
-        "Withdrawal",
-        "BR-WDR",
+        "Segment Range",
+        "BR-SEG",
         "badge-warning",
         [
-            ("001", "The account must exist."),
-            ("002", "The customer linked to the account must exist."),
-            ("003", "The account must be active."),
-            ("004", "The withdrawal amount must be strictly positive."),
-            ("005", "The withdrawal amount must have a maximum of two decimal places."),
-            ("006", "The withdrawal amount must be greater than or equal to the minimum withdrawal amount defined for the customer segment."),
-            ("007", "The withdrawal amount must be less than or equal to the maximum withdrawal amount defined for the customer segment."),
-            ("008", "The number of monthly withdrawals must not exceed the limit defined for the customer segment."),
-            ("009", "If the free withdrawal limit is exceeded, a withdrawal fee is applied."),
-            ("010", "The account balance must be sufficient to cover the withdrawal amount plus any applicable fee."),
-            ("011", "Overdraft is not allowed."),
-            ("012", "If all controls are valid, the account balance is decreased by the withdrawal amount and the fee."),
-            ("013", "A transaction record of type WITHDRAW must be created."),
+            ("001", "The amount must be greater than or equal to the minimum defined for the customer segment."),
+            ("002", "The amount must be less than or equal to the maximum defined for the customer segment."),
         ],
     ),
     (
-        "Transfer",
-        "BR-TRF",
+        "Balance Control",
+        "BR-BAL",
         "badge-cics",
         [
-            ("001", "The source account must exist."),
-            ("002", "The target account must exist."),
-            ("003", "The source customer must exist."),
-            ("004", "The target customer must exist."),
-            ("005", "Both accounts must be active."),
-            ("006", "The source and target accounts must be different."),
-            ("007", "The transfer amount must be strictly positive."),
-            ("008", "The transfer amount must have a maximum of two decimal places."),
-            ("009", "The transfer amount must be greater than or equal to the minimum transfer amount defined for the source customer segment."),
-            ("010", "The transfer amount must be less than or equal to the maximum transfer amount defined for the source customer segment."),
-            ("011", "The source account balance must be sufficient to cover the transfer amount."),
-            ("012", "The target account balance after transfer must not exceed the maximum balance allowed for the target customer segment."),
-            ("013", "The debit and credit must be processed as one logical operation."),
-            ("014", "If one update fails, the full transfer must be rejected."),
-            ("015", "A transaction record of type TRANSFER must be created."),
+            ("001", "The account balance must be sufficient to cover the amount plus any applicable fee (overdraft not allowed)."),
+            ("002", "The balance after the operation must not exceed the maximum balance allowed for the customer segment."),
+        ],
+    ),
+    (
+        "Withdrawal Limit & Fee",
+        "BR-LIM",
+        "badge-purple",
+        [
+            ("001", "The number of monthly withdrawals must not exceed the limit defined for the customer segment."),
+            ("002", "A fee is applied if the free withdrawal limit is exceeded."),
         ],
     ),
 ]
@@ -1066,6 +921,42 @@ for title, prefix, badge_class, items in business_rule_groups:
     </div>
     """).strip(), unsafe_allow_html=True)
 
+
+execution_logic_items = [
+    ("CUST-006", "The consultation must return the account number, customer ID, account type, balance and opening date."),
+    ("DEP-009", "If all controls are valid, the account balance is increased by the deposit amount."),
+    ("DEP-010", "A transaction record of type DEPOSIT must be created."),
+    ("WDR-012", "If all controls are valid, the account balance is decreased by the withdrawal amount and the fee."),
+    ("WDR-013", "A transaction record of type WITHDRAW must be created."),
+    ("TRF-013", "The debit and credit must be processed as one logical operation."),
+    ("TRF-014", "If one update fails, the full transfer must be rejected."),
+    ("TRF-015", "A transaction record of type TRANSFER must be created."),
+]
+
+execution_rows = "".join(
+    f"""<div class="model-row">
+<span style="font-family:'JetBrains Mono',monospace; font-size:0.75rem; font-weight:700; color:#94a3b8; white-space:nowrap;">{code}</span>
+<span class="check-text" style="flex:1;">{rule}</span>
+</div>"""
+    for code, rule in execution_logic_items
+)
+
+st.markdown(textwrap.dedent(f"""
+<div class="section-box">
+  <div style="display:flex; align-items:center; gap:0.6rem; margin-bottom:0.65rem;">
+    <div style="font-size:0.95rem; font-weight:800; color:#0f172a;">Program Execution Logic</div>
+    <span class="badge badge-secondary">BATCH / CICS</span>
+  </div>
+  <div style="color:#475569; font-size:0.82rem; margin-bottom:0.6rem;">
+    These rules are not business validations — they describe what the calling
+    program does once all controls above have passed (balance update,
+    transaction record creation, transfer atomicity). They live in the
+    program itself, not in bank-parameters/.
+  </div>
+  <div class="model-row-wrap" style="margin:0;">{execution_rows}</div>
+</div>
+""").strip(), unsafe_allow_html=True)
+
 # -----------------------------------------------------------------------------
 # COBOL parameter recommendation
 # -----------------------------------------------------------------------------
@@ -1073,13 +964,18 @@ for title, prefix, badge_class, items in business_rule_groups:
 st.markdown("""
 <div class="section-box">
   <div style="font-size:0.8rem; font-weight:800; text-transform:uppercase; letter-spacing:0.08em; color:#7c3aed; margin-bottom:0.6rem;">
-    COBOL Implementation Recommendation
+    COBOL Implementation
   </div>
   <div style="color:#475569; line-height:1.7; font-size:0.9rem;">
-    These values should not be hard-coded directly inside transaction programs.
-    They should be centralized in a dedicated parameter copybook or parameter file,
-    for example <code>BANKPARM.cpy</code> or <code>SEGMENT-RULES.cpy</code>, then reused by
-    <code>DEPOSIT</code>, <code>WITHDRAW</code> and <code>TRANSFER</code>.
+    Business rules are factorized into 5 external subprograms under
+    <code>bank-parameters/</code>, called from <code>DEPOSIT</code>,
+    <code>WITHDRAW</code>, <code>TRANSFER</code> and <code>CNSACC</code>:
+    <code>RULE-ACCOUNT-CTRL.cbl</code>, <code>RULE-FORMAT.cbl</code>,
+    <code>RULE-SEGMENT-RANGE.cbl</code>, <code>RULE-BALANCE.cbl</code> et
+    <code>RULE-LIMIT.cbl</code>. Each returns one dedicated flag per rule
+    (<code>Y</code>/<code>N</code>/<code>-</code> for not applicable),
+    driven by an <code>LK-OPERATION-TYPE</code> parameter so only the
+    relevant checks run for each transaction type.
   </div>
 </div>
 """, unsafe_allow_html=True)
