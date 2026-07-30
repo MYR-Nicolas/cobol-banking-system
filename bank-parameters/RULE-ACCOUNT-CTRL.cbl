@@ -11,24 +11,24 @@
       * Business rules covered :
       *
       * BR-ACC-001  The account must exist.
-      *             (covers CUST-002, DEP-001, WDR-001, TRF-001, TRF-002)
+      *             
       *
       * BR-ACC-002  The customer must exist.
-      *             (covers CUST-001, DEP-002, WDR-002, TRF-003, TRF-004)
+      *             
       *
       * BR-ACC-003  The account must be active.
-      *             (covers CUST-005, DEP-003, WDR-003, TRF-005)
+      *             
       *
       * BR-ACC-004  The account customer ID must match an existing
       *             customer ID.
-      *             (covers CUST-003)
+      *            
       *
       * BR-ACC-005  The entered last name and first name must match
       *             the customer linked to the account.
-      *             (covers CUST-004)
+      *             
       *
       * BR-ACC-006  The source and target accounts must be different.
-      *             (covers TRF-006 - transfer only)
+      *             
       *****************************************************************
        IDENTIFICATION DIVISION.
        PROGRAM-ID.  RULE-ACCOUNT-CTRL.
