@@ -850,6 +850,129 @@ with col_c2:
 # SECTION 7 - Detailed business rules by domain
 # -----------------------------------------------------------------------------
 
+# =============================================================================
+# SECTION 7 - BUSINESS RULES
+# Defines segment-based validation rules and banking constraints.
+# =============================================================================
+
+st.markdown('<div class="sec-label">Section 7 - Business Rules</div>', unsafe_allow_html=True)
+
+st.markdown("""
+<div class="section-box">
+  <div style="font-size:1.05rem; font-weight:800; color:#0f172a; margin-bottom:0.45rem;">
+    Segment-Based Banking Rules
+  </div>
+  <div style="color:#475569; line-height:1.7; font-size:0.9rem;">
+    Business rules are based on the customer segment stored in the customer file.
+    The detected segments are <strong>YOUNG</strong>, <strong>STANDARD</strong>,
+    <strong>PREMIUM</strong> and <strong>PRO</strong>. These limits are inspired by
+    realistic retail banking constraints and remain fully parameter-driven for
+    COBOL implementation.
+  </div>
+</div>
+""", unsafe_allow_html=True)
+
+# -----------------------------------------------------------------------------
+# Segment limits
+# -----------------------------------------------------------------------------
+
+segment_limits = [
+    {
+        "segment": "YOUNG",
+        "profile": "Young customer / student",
+        "min_deposit": "10.00",
+        "max_deposit": "2,000.00",
+        "min_withdrawal": "10.00",
+        "max_withdrawal": "300.00",
+        "free_withdrawals": "3",
+        "withdrawal_fee": "1.20",
+        "min_transfer": "1.00",
+        "max_transfer": "1,000.00",
+        "max_balance": "20,000.00",
+    },
+    {
+        "segment": "STANDARD",
+        "profile": "Standard retail customer",
+        "min_deposit": "10.00",
+        "max_deposit": "5,000.00",
+        "min_withdrawal": "10.00",
+        "max_withdrawal": "700.00",
+        "free_withdrawals": "3",
+        "withdrawal_fee": "1.20",
+        "min_transfer": "1.00",
+        "max_transfer": "5,000.00",
+        "max_balance": "100,000.00",
+    },
+    {
+        "segment": "PREMIUM",
+        "profile": "High-value individual customer",
+        "min_deposit": "10.00",
+        "max_deposit": "20,000.00",
+        "min_withdrawal": "10.00",
+        "max_withdrawal": "1,500.00",
+        "free_withdrawals": "Unlimited",
+        "withdrawal_fee": "0.00",
+        "min_transfer": "1.00",
+        "max_transfer": "15,000.00",
+        "max_balance": "500,000.00",
+    },
+    {
+        "segment": "PRO",
+        "profile": "Professional customer",
+        "min_deposit": "10.00",
+        "max_deposit": "50,000.00",
+        "min_withdrawal": "10.00",
+        "max_withdrawal": "3,000.00",
+        "free_withdrawals": "10",
+        "withdrawal_fee": "1.20",
+        "min_transfer": "1.00",
+        "max_transfer": "50,000.00",
+        "max_balance": "1,000,000.00",
+    },
+]
+
+segment_rows = "".join(
+    f"""<tr>
+<td><strong>{item['segment']}</strong><br><span style="color:#94a3b8; font-size:0.72rem;">{item['profile']}</span></td>
+<td>{item['min_deposit']}</td>
+<td>{item['max_deposit']}</td>
+<td>{item['min_withdrawal']}</td>
+<td>{item['max_withdrawal']}</td>
+<td>{item['free_withdrawals']}</td>
+<td>{item['withdrawal_fee']}</td>
+<td>{item['min_transfer']}</td>
+<td>{item['max_transfer']}</td>
+<td>{item['max_balance']}</td>
+</tr>"""
+    for item in segment_limits
+)
+
+st.markdown(textwrap.dedent(f"""
+<div class="section-box">
+  <div style="font-size:0.8rem; font-weight:800; text-transform:uppercase; letter-spacing:0.08em; color:#2563eb; margin-bottom:0.65rem;">
+    Segment Parameter Table
+  </div>
+  <div style="overflow-x:auto;">
+    <table class="detail-table">
+      <tr>
+        <td>Segment</td>
+        <td>Min Deposit</td>
+        <td>Max Deposit</td>
+        <td>Min Withdrawal</td>
+        <td>Max Withdrawal</td>
+        <td>Free Withdrawals / Month</td>
+        <td>Withdrawal Fee</td>
+        <td>Min Transfer</td>
+        <td>Max Transfer</td>
+        <td>Max Account Balance</td>
+      </tr>
+      {segment_rows}
+    </table>
+  </div>
+</div>
+""").strip(), unsafe_allow_html=True)
+
+
 business_rule_groups = [
     (
         "Account & Customer Control",

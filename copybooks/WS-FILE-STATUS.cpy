@@ -12,7 +12,8 @@
       *----------------------------------------------------------------*
       *  CHANGE LOG                                                    *
       *    DATE        VERS  AUTHOR    DESCRIPTION                     *
-      *    2026-07-29  V01   NMAYEUR   INITIAL VERSION                 *
+      *    2026-07-29  V01   NMAYEUR   INITIAL VERSION
+      *    2026-08-02  V02   NMAYEUR   ADD PARAMSEG-STATUS.                 *
       *================================================================*
        01  WS-FILE-STATUS-GROUP.
 
@@ -36,3 +37,10 @@
                88  TRANSACTIONS-NOT-FOUND      VALUE '23'.
                88  TRANSACTIONS-EOF            VALUE '10'.
                88  TRANSACTIONS-INVALID-KEY    VALUE '21' '23'.
+           
+           05  WS-PARAMSEG-STATUS          PIC X(02).
+               88  PARAMSEG-OK                 VALUE '00'.
+               88  PARAMSEG-DUPLICATE          VALUE '22'.
+               88  PARAMSEG-NOT-FOUND          VALUE '23'.
+               88  PARAMSEG-EOF                VALUE '10'.
+               88  PARAMSEG-INVALID-KEY        VALUE '21' '23'.

@@ -3,7 +3,7 @@
       *  PURPOSE   : CUSTOMER RECORD                                   *
       *  TYPE      : RECORD                                            *
       *----------------------------------------------------------------*
-      *  FILE      : CLIENTS             ORGANIZATION : VSAM KSDS      *
+      *  FILE      : CUSTOMER             ORGANIZATION : VSAM KSDS      *
       *  LRECL     : 077                 KEY : CUST-ID POS 1 LEN 7     *
       *----------------------------------------------------------------*
       *  REQUIRES  : NONE                                              *
