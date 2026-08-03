@@ -449,10 +449,70 @@ BUSINESS_RULES = [
 
 
 # =============================================================================
+# PATH RESOLUTION
+# Source paths are resolved against the project root, not against the current
+# working directory. Streamlit is often launched from a different folder than
+# the one containing this page, which would make every Path.exists() call fail.
+# =============================================================================
+
+# This file typically lives under <root>/pages/, so the project root is one or
+# two levels up. Candidate roots are tried in order until the file is found.
+_PAGE_DIR = Path(__file__).resolve().parent
+
+CANDIDATE_ROOTS = [
+    Path.cwd(),
+    _PAGE_DIR,
+    _PAGE_DIR.parent,
+    _PAGE_DIR.parent.parent,
+]
+
+
+def resolve_source_path(source_path: str) -> Path | None:
+    """
+    Locate a source file by trying several project roots.
+
+    Falls back to a recursive search by file name when the declared relative
+    path does not match the actual folder layout. The lookup is case-insensitive
+    on the file name, which matters because copybook extensions are inconsistent
+    across the repository (.cpy and .CPY).
+
+    Parameters
+    ----------
+    source_path : str
+        Declared relative path to the source file.
+
+    Returns
+    -------
+    Path | None
+        The resolved path if the file was found, None otherwise.
+    """
+
+    relative = Path(source_path)
+
+    # 1. Direct match against each candidate root.
+    for root in CANDIDATE_ROOTS:
+        candidate = root / relative
+        if candidate.is_file():
+            return candidate
+
+    # 2. Fallback: recursive search by file name, case-insensitive.
+    target_name = relative.name.lower()
+
+    for root in CANDIDATE_ROOTS:
+        if not root.is_dir():
+            continue
+        for found in root.rglob("*"):
+            if found.is_file() and found.name.lower() == target_name:
+                return found
+
+    return None
+
+
+# =============================================================================
 # HELPER FUNCTIONS
 # =============================================================================
 
-def get_source_status(source_path: str) -> tuple[Path, bool, str, str]:
+def get_source_status(source_path: str) -> tuple[Path | None, bool, str, str]:
     """
     Return the implementation status of a COBOL source artifact.
 
@@ -465,15 +525,15 @@ def get_source_status(source_path: str) -> tuple[Path, bool, str, str]:
 
     Returns
     -------
-    tuple[Path, bool, str, str]
-        - file_path    : Path object pointing to the source file.
-        - exists       : True if the file exists, False otherwise.
+    tuple[Path | None, bool, str, str]
+        - file_path    : Resolved Path if found, None otherwise.
+        - exists       : True if the file was found, False otherwise.
         - status       : Display status used in the UI.
         - status_class : CSS class used to style the status badge.
     """
 
-    file_path = Path(source_path)
-    exists = file_path.exists()
+    file_path = resolve_source_path(source_path)
+    exists = file_path is not None
 
     status = "Created" if exists else "In Progress"
     status_class = "badge-created" if exists else "badge-progress"
@@ -533,9 +593,11 @@ def render_source_card(
 
     st.markdown(card_html, unsafe_allow_html=True)
 
-    if exists:
+    if exists and file_path is not None:
         with st.expander(f"Show Source Code - {item['filename']}", expanded=False):
-            code = file_path.read_text(encoding="utf-8")
+            # COBOL sources may be encoded in latin-1 or contain EBCDIC-converted
+            # characters, so decoding errors are tolerated rather than fatal.
+            code = file_path.read_text(encoding="utf-8", errors="replace")
             st.code(code, language=code_language)
 
 
@@ -586,7 +648,9 @@ def count_status(items: list[dict]) -> tuple[int, int]:
         - progress_count : Number of artifacts still in progress.
     """
 
-    created_count = sum(1 for item in items if Path(item["path"]).exists())
+    created_count = sum(
+        1 for item in items if resolve_source_path(item["path"]) is not None
+    )
     progress_count = len(items) - created_count
 
     return created_count, progress_count
