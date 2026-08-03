@@ -46,7 +46,7 @@
 
        PROCEDURE DIVISION USING LK-WTHDRW-COUNT
                                  LK-WTHDRW-LIMIT
-                                 PARAM-RECORD
+                                 CUSTOMER-RECORD
                                  LK-WTHDRW-FLAG.
 
            EVALUATE TRUE

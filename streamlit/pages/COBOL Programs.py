@@ -12,7 +12,7 @@ import streamlit as st
 # =============================================================================
 
 st.set_page_config(
-    page_title="COBOL Programs",
+    page_title="COBOL Source Catalog",
     layout="wide",
 )
 
@@ -164,6 +164,24 @@ GLOBAL_CSS = """
     border: 1px solid #fdba74;
 }
 
+.badge-copybook {
+    background: #f0fdfa;
+    color: #115e59;
+    border: 1px solid #99f6e4;
+}
+
+.badge-rule {
+    background: #fef2f2;
+    color: #991b1b;
+    border: 1px solid #fecaca;
+}
+
+.badge-neutral {
+    background: #f8fafc;
+    color: #475569;
+    border: 1px solid #e2e8f0;
+}
+
 [data-testid="stExpander"] {
     border-radius: 14px;
     border: 1px solid rgba(226,232,240,0.95);
@@ -175,6 +193,23 @@ GLOBAL_CSS = """
     border-radius: 14px !important;
     border: 1px solid rgba(226,232,240,0.9) !important;
     box-shadow: 0 4px 12px rgba(15,23,42,0.04) !important;
+}
+
+.stTabs [data-baseweb="tab-list"] {
+    gap: 0.4rem;
+    border-bottom: 1px solid rgba(226,232,240,0.9);
+}
+
+.stTabs [data-baseweb="tab"] {
+    font-weight: 700;
+    font-size: 0.9rem;
+    letter-spacing: 0.01em;
+    color: #64748b;
+    padding: 0.7rem 1.2rem;
+}
+
+.stTabs [aria-selected="true"] {
+    color: #2563eb;
 }
 
 .constraint-warning {
@@ -209,29 +244,8 @@ st.markdown(GLOBAL_CSS, unsafe_allow_html=True)
 
 
 # =============================================================================
-# IMPLEMENTATION NOTICE
-# Displays a professional warning about the current CICS simulation constraint.
-# =============================================================================
-
-st.markdown("""
-<div class="constraint-warning">
-  <div class="constraint-warning-title">Implementation Notice</div>
-  <div class="constraint-warning-text">
-    CICS-designated programs are currently implemented and executed in
-    <strong>BATCH mode</strong> due to environment and platform constraints.
-    They remain structured as a CICS-oriented simulation and are planned to
-    evolve toward true online transaction processing when a compatible
-    mainframe/CICS runtime is available.
-  </div>
-</div>
-""", unsafe_allow_html=True)
-
-
-# =============================================================================
 # PROGRAM DEFINITIONS
 # Catalog of COBOL programs included in the project.
-# Each program is displayed with its title, file name, type, source path,
-# business description and implementation status.
 #
 # Source files are organized under src/BATCH/ and src/CICS/ depending on
 # whether the program runs as a batch job or as an online CICS transaction.
@@ -284,28 +298,181 @@ PROGRAMS = [
 
 
 # =============================================================================
+# COPYBOOK DEFINITIONS
+# Catalog of copybooks used across batch and CICS programs.
+#
+# Each copybook belongs to a family:
+#   - RECORD : record layout, included in FILE SECTION or LINKAGE SECTION
+#   - SELECT : SELECT clause fragment, included in FILE-CONTROL
+#   - FD     : file description fragment, included in FILE SECTION
+# =============================================================================
+
+COPYBOOKS = [
+    {
+        "title": "CUSTOMER - Customer Record",
+        "filename": "CUSTOMER.cpy",
+        "type": "RECORD",
+        "path": "bank-parameters/copybooks/CUSTOMER.cpy",
+        "description": "Customer record layout for the CUSTOMER VSAM KSDS file.",
+    },
+    {
+        "title": "SEG-CUSTOMER - Customer Segment Parameters",
+        "filename": "SEG-CUSTOMER.cpy",
+        "type": "RECORD",
+        "path": "bank-parameters/copybooks/SEG-CUSTOMER.cpy",
+        "description": (
+            "Segment parameter record exposing CUST-SEGMENT with its condition-names "
+            "(SEG-STANDARD, SEG-PREMIUM, SEG-PROFESSIONAL, SEG-YOUTH) used by the "
+            "business rule modules."
+        ),
+    },
+    {
+        "title": "ACCOUNT - Account Record",
+        "filename": "ACCOUNT.cpy",
+        "type": "RECORD",
+        "path": "bank-parameters/copybooks/ACCOUNT.cpy",
+        "description": "Account record layout including balance and account status.",
+    },
+    {
+        "title": "TRANSACTION - Transaction Record",
+        "filename": "TRANSACTION.cpy",
+        "type": "RECORD",
+        "path": "bank-parameters/copybooks/TRANSACTION.cpy",
+        "description": "Transaction record layout including transaction type, date and amount.",
+    },
+    {
+        "title": "SEL-CUST - Customer SELECT",
+        "filename": "SEL-CUST.cpy",
+        "type": "SELECT",
+        "path": "bank-parameters/copybooks/SEL-CUST.cpy",
+        "description": "SELECT clause for the CUSTOMER VSAM KSDS file, indexed organization.",
+    },
+    {
+        "title": "SEL-SEG-CUST - Segment Parameter SELECT",
+        "filename": "SEL-SEG-CUST.cpy",
+        "type": "SELECT",
+        "path": "bank-parameters/copybooks/SEL-SEG-CUST.cpy",
+        "description": "SELECT clause for the customer segment parameter file.",
+    },
+    {
+        "title": "SEL-ACC - Account SELECT",
+        "filename": "SEL-ACC.CPY",
+        "type": "SELECT",
+        "path": "bank-parameters/copybooks/SEL-ACC.CPY",
+        "description": "SELECT clause for the ACCOUNT VSAM KSDS file, keyed on the account identifier.",
+    },
+    {
+        "title": "SEL-TRX - Transaction SELECT",
+        "filename": "SEL-TRX.cpy",
+        "type": "SELECT",
+        "path": "bank-parameters/copybooks/SEL-TRX.cpy",
+        "description": "SELECT clause for the TRANSACTION VSAM KSDS file, dynamic access for account browsing.",
+    },
+    {
+        "title": "WS-FILE-STATUS - File Status Codes",
+        "filename": "WS-FILE-STATUS.cpy",
+        "type": "STATUS",
+        "path": "bank-parameters/copybooks/WS-FILE-STATUS.cpy",
+        "description": (
+            "Shared file status field with its condition-names, used to test VSAM "
+            "return codes consistently across all programs."
+        ),
+    },
+]
+
+
+# =============================================================================
+# BUSINESS RULE DEFINITIONS
+# Catalog of the business rules implemented as external COBOL subprograms.
+#
+# Each rule is implemented in its own RULE-*.cbl module under
+# src/BATCH/RULES/ and is invoked through a static or dynamic CALL.
+# =============================================================================
+
+BUSINESS_RULES = [
+    {
+        "title": "RULE-BALANCE - Maximum Balance",
+        "rule_id": "BR-BAL-002",
+        "filename": "RULE-BALANCE.cbl",
+        "type": "Balance",
+        "path": "bank-parameters/RULE-BALANCE.cbl",
+        "description": (
+            "BR-BAL-002 - The balance after the operation must not exceed the maximum "
+            "balance allowed for the customer segment."
+        ),
+    },
+    {
+        "title": "RULE-WITHDRAWAL - Monthly Withdrawal Limit",
+        "rule_id": "BR-LIM-001",
+        "filename": "RULE-WITHDRAWAL.cbl",
+        "type": "Limit",
+        "path": "bank-parameters/RULE-WITHDRAWAL.cbl",
+        "description": (
+            "BR-LIM-001 - The number of monthly withdrawals must not exceed the limit "
+            "defined for the customer segment. The PREMIUM segment has no withdrawal limit."
+        ),
+    },
+    {
+        "title": "RULE-ACCOUNT-CTRL - Account Control",
+        "rule_id": "BR-ACC-001",
+        "filename": "RULE-ACCOUNT-CTRL.cbl",
+        "type": "Account",
+        "path": "bank-parameters/RULE-ACCOUNT-CTRL.cbl",
+        "description": (
+            "BR-ACC-001 - Controls the eligibility of an account before any financial "
+            "operation is applied."
+        ),
+    },
+    {
+        "title": "RULE-SEG-RANGE - Segment Range Control",
+        "rule_id": "BR-SEG-001",
+        "filename": "RULE-SEG-RANGE.cbl",
+        "type": "Segment",
+        "path": "bank-parameters/RULE-SEG-RANGE.cbl",
+        "description": (
+            "BR-SEG-001 - Validates that a value stays within the range authorised for "
+            "the customer segment."
+        ),
+    },
+    {
+        "title": "RULE-FORMAT - Format Control",
+        "rule_id": "BR-FMT-001",
+        "filename": "RULE-FORMAT.cbl",
+        "type": "Format",
+        "path": "bank-parameters/RULE-FORMAT.cbl",
+        "description": (
+            "BR-FMT-001 - Validates the structural format of input fields before any "
+            "business control is applied."
+        ),
+    },
+]
+
+
+# =============================================================================
 # HELPER FUNCTIONS
 # =============================================================================
 
-def get_program_status(program_path: str) -> tuple[Path, bool, str, str]:
+def get_source_status(source_path: str) -> tuple[Path, bool, str, str]:
     """
-    Return the implementation status of a COBOL program.
+    Return the implementation status of a COBOL source artifact.
+
+    Works for any source artifact: program, copybook or business rule module.
 
     Parameters
     ----------
-    program_path : str
+    source_path : str
         Relative path to the COBOL source file.
 
     Returns
     -------
     tuple[Path, bool, str, str]
-        - file_path    : Path object pointing to the COBOL source file.
+        - file_path    : Path object pointing to the source file.
         - exists       : True if the file exists, False otherwise.
         - status       : Display status used in the UI.
         - status_class : CSS class used to style the status badge.
     """
 
-    file_path = Path(program_path)
+    file_path = Path(source_path)
     exists = file_path.exists()
 
     status = "Created" if exists else "In Progress"
@@ -314,130 +481,184 @@ def get_program_status(program_path: str) -> tuple[Path, bool, str, str]:
     return file_path, exists, status, status_class
 
 
-def render_program_card(program: dict) -> None:
+def render_source_card(
+    item: dict,
+    type_badge_class: str,
+    code_language: str = "cobol",
+) -> None:
     """
-    Render a program documentation card.
+    Render a source documentation card.
 
     The card displays:
-    - Program title
-    - Source path (src/BATCH/... or src/CICS/...)
+    - Title
+    - Source path
     - Business description
-    - COBOL file name
-    - Program type
+    - Source file name
+    - Type badge
     - Implementation status
 
-    If the COBOL file exists, a source code expander is displayed.
-    If the file does not exist, no expander is displayed.
+    If the source file exists, a source code expander is displayed.
+    If the file does not exist, no expander is displayed. This avoids
+    showing placeholder or fake code for artifacts still in progress.
 
     Parameters
     ----------
-    program : dict
+    item : dict
         Dictionary containing title, filename, type, path and description.
+    type_badge_class : str
+        CSS class applied to the type badge.
+    code_language : str
+        Language used for syntax highlighting in the expander.
 
     Returns
     -------
     None
     """
 
-    file_path, exists, status, status_class = get_program_status(program["path"])
+    file_path, exists, status, status_class = get_source_status(item["path"])
 
-    type_badge_class = "badge-cics" if program["type"] == "CICS" else "badge-type"
-
-    # Render the visual documentation card.
-    # HTML is rendered through st.markdown with unsafe_allow_html=True.
-    st.markdown(
-        f"""
-        <div class="program-card">
-            <div class="program-title">{program["title"]}</div>
-            <div class="program-path">{program["path"]}</div>
-            <div class="program-description">{program["description"]}</div>
-            <div>
-                <span class="badge badge-file">{program["filename"]}</span>
-                <span class="badge {type_badge_class}">{program["type"]}</span>
-                <span class="badge {status_class}">{status}</span>
-            </div>
-        </div>
-        """,
-        unsafe_allow_html=True,
+    # Same constraint as render_kpi_grid: no leading whitespace in the HTML.
+    card_html = (
+        f'<div class="program-card">'
+        f'<div class="program-title">{item["title"]}</div>'
+        f'<div class="program-path">{item["path"]}</div>'
+        f'<div class="program-description">{item["description"]}</div>'
+        f"<div>"
+        f'<span class="badge badge-file">{item["filename"]}</span>'
+        f'<span class="badge {type_badge_class}">{item["type"]}</span>'
+        f'<span class="badge {status_class}">{status}</span>'
+        f"</div>"
+        f"</div>"
     )
 
-    # Display the COBOL source code only when the source file exists.
-    # This avoids showing placeholder or fake code for programs still in progress.
+    st.markdown(card_html, unsafe_allow_html=True)
+
     if exists:
-        with st.expander(f"Show Source Code - {program['filename']}", expanded=False):
+        with st.expander(f"Show Source Code - {item['filename']}", expanded=False):
             code = file_path.read_text(encoding="utf-8")
-            st.code(code, language="cobol")
+            st.code(code, language=code_language)
 
 
-def count_programs(programs: list[dict]) -> tuple[int, int]:
+def render_kpi_grid(cells: list[tuple[str, int]]) -> None:
     """
-    Count created and in-progress COBOL programs.
+    Render a KPI grid from a list of label/value pairs.
 
     Parameters
     ----------
-    programs : list[dict]
-        List of program metadata dictionaries.
+    cells : list[tuple[str, int]]
+        List of (label, value) pairs displayed as KPI cells.
+
+    Returns
+    -------
+    None
+    """
+
+    # The generated HTML must not contain leading whitespace on any line.
+    # Streamlit renders markdown, and any line indented by 4 spaces or more
+    # is interpreted as a code block instead of raw HTML.
+    cells_html = "".join(
+        f'<div class="kpi-cell">'
+        f'<div class="kpi-label">{label}</div>'
+        f'<div class="kpi-value">{value}</div>'
+        f"</div>"
+        for label, value in cells
+    )
+
+    st.markdown(
+        f'<div class="kpi-grid">{cells_html}</div>',
+        unsafe_allow_html=True,
+    )
+
+
+def count_status(items: list[dict]) -> tuple[int, int]:
+    """
+    Count created and in-progress source artifacts.
+
+    Parameters
+    ----------
+    items : list[dict]
+        List of artifact metadata dictionaries.
 
     Returns
     -------
     tuple[int, int]
-        - created_count  : Number of programs whose source file exists.
-        - progress_count : Number of programs still in progress.
+        - created_count  : Number of artifacts whose source file exists.
+        - progress_count : Number of artifacts still in progress.
     """
 
-    created_count = sum(1 for program in programs if Path(program["path"]).exists())
-    progress_count = len(programs) - created_count
+    created_count = sum(1 for item in items if Path(item["path"]).exists())
+    progress_count = len(items) - created_count
 
     return created_count, progress_count
 
 
-def count_by_type(programs: list[dict]) -> tuple[int, int]:
+def count_by_type(items: list[dict], type_value: str) -> int:
     """
-    Count programs by execution type.
+    Count artifacts matching a given type value.
 
     Parameters
     ----------
-    programs : list[dict]
-        List of program metadata dictionaries.
+    items : list[dict]
+        List of artifact metadata dictionaries.
+    type_value : str
+        Type value to match.
 
     Returns
     -------
-    tuple[int, int]
-        - batch_count : Number of Batch programs.
-        - cics_count  : Number of CICS programs.
+    int
+        Number of artifacts of the requested type.
     """
 
-    batch_count = sum(1 for program in programs if program["type"] == "Batch")
-    cics_count = sum(1 for program in programs if program["type"] == "CICS")
+    return sum(1 for item in items if item["type"] == type_value)
 
-    return batch_count, cics_count
+
+def render_section_title(label: str) -> None:
+    """
+    Render a section title separator.
+
+    Parameters
+    ----------
+    label : str
+        Section label displayed in uppercase.
+
+    Returns
+    -------
+    None
+    """
+
+    st.markdown(
+        f'<div class="section-title">{label}</div>',
+        unsafe_allow_html=True,
+    )
 
 
 # =============================================================================
 # HERO SECTION
-# Main page banner presenting the purpose of the COBOL programs catalog.
+# Main page banner presenting the purpose of the source catalog.
 # =============================================================================
 
 st.markdown(
     """
     <div class="hero-box">
         <div style="font-size:1.7rem; font-weight:800; letter-spacing:-0.03em;">
-            COBOL Programs
+            COBOL Source Catalog
         </div>
         <div style="font-size:0.9rem; opacity:0.75; margin-top:0.25rem;">
             Core Banking System - Source Code Documentation
         </div>
         <p style="font-size:0.95rem; opacity:0.9; line-height:1.7; margin-top:1rem; margin-bottom:1rem;">
-            This page presents the COBOL programs created for the banking simulation project,
-            organized under src/BATCH and src/CICS. Each program includes its functional role,
-            implementation status and source code preview.
+            This page presents the COBOL artifacts created for the banking simulation project:
+            programs organized under src/BATCH and src/CICS, copybooks shared across modules,
+            and business rules implemented as external subprograms. Each entry includes its
+            functional role, implementation status and source code preview.
         </p>
         <div>
             <span class="badge" style="background:rgba(255,255,255,0.12); color:white; border-color:rgba(255,255,255,0.3);">COBOL</span>
             <span class="badge" style="background:rgba(255,255,255,0.12); color:white; border-color:rgba(255,255,255,0.3);">Batch Programs</span>
             <span class="badge" style="background:rgba(255,255,255,0.12); color:white; border-color:rgba(255,255,255,0.3);">CICS Programs</span>
-            <span class="badge" style="background:rgba(255,255,255,0.12); color:white; border-color:rgba(255,255,255,0.3);">Sequential Files</span>
+            <span class="badge" style="background:rgba(255,255,255,0.12); color:white; border-color:rgba(255,255,255,0.3);">VSAM KSDS</span>
             <span class="badge" style="background:rgba(255,255,255,0.12); color:white; border-color:rgba(255,255,255,0.3);">Copybooks</span>
+            <span class="badge" style="background:rgba(255,255,255,0.12); color:white; border-color:rgba(255,255,255,0.3);">Business Rules</span>
         </div>
     </div>
     """,
@@ -446,56 +667,109 @@ st.markdown(
 
 
 # =============================================================================
-# KPI SECTION
-# Displays project statistics based on existing COBOL source files.
+# TAB LAYOUT
+# One tab per artifact family: Programs, Copybooks, Business Rules.
+# Each tab reuses the same KPI grid + card catalog layout.
 # =============================================================================
 
-created_count, progress_count = count_programs(PROGRAMS)
-batch_count, cics_count = count_by_type(PROGRAMS)
-
-st.markdown(
-    f"""
-    <div class="kpi-grid">
-        <div class="kpi-cell">
-            <div class="kpi-label">Programs</div>
-            <div class="kpi-value">{len(PROGRAMS)}</div>
-        </div>
-        <div class="kpi-cell">
-            <div class="kpi-label">Batch</div>
-            <div class="kpi-value">{batch_count}</div>
-        </div>
-        <div class="kpi-cell">
-            <div class="kpi-label">CICS</div>
-            <div class="kpi-value">{cics_count}</div>
-        </div>
-        <div class="kpi-cell">
-            <div class="kpi-label">Created</div>
-            <div class="kpi-value">{created_count}</div>
-        </div>
-        <div class="kpi-cell">
-            <div class="kpi-label">In Progress</div>
-            <div class="kpi-value">{progress_count}</div>
-        </div>
-    </div>
-    """,
-    unsafe_allow_html=True,
+tab_programs, tab_copybooks, tab_rules = st.tabs(
+    ["Programs", "Copybooks", "Business Rules"]
 )
 
 
-# =============================================================================
-# PROGRAM CATALOG
-# Displays all COBOL programs with their current implementation status.
-# =============================================================================
+# -----------------------------------------------------------------------------
+# TAB 1 - PROGRAMS
+# -----------------------------------------------------------------------------
 
-st.markdown(
-    '<div class="section-title">Program Catalog</div>',
-    unsafe_allow_html=True,
-)
+with tab_programs:
+
+    # Professional warning about the current CICS simulation constraint.
+    st.markdown(
+        """
+        <div class="constraint-warning">
+          <div class="constraint-warning-title">Implementation Notice</div>
+          <div class="constraint-warning-text">
+            CICS-designated programs are currently implemented and executed in
+            <strong>BATCH mode</strong> due to environment and platform constraints.
+            They remain structured as a CICS-oriented simulation and are planned to
+            evolve toward true online transaction processing when a compatible
+            mainframe/CICS runtime is available.
+          </div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+    created_count, progress_count = count_status(PROGRAMS)
+    batch_count = count_by_type(PROGRAMS, "Batch")
+    cics_count = count_by_type(PROGRAMS, "CICS")
+
+    render_kpi_grid(
+        [
+            ("Programs", len(PROGRAMS)),
+            ("Batch", batch_count),
+            ("CICS", cics_count),
+            ("Created", created_count),
+            ("In Progress", progress_count),
+        ]
+    )
+
+    render_section_title("Program Catalog")
+
+    for program in PROGRAMS:
+        type_badge_class = (
+            "badge-cics" if program["type"] == "CICS" else "badge-type"
+        )
+        render_source_card(program, type_badge_class)
 
 
-# =============================================================================
-# RENDER PROGRAMS
-# =============================================================================
+# -----------------------------------------------------------------------------
+# TAB 2 - COPYBOOKS
+# -----------------------------------------------------------------------------
 
-for program in PROGRAMS:
-    render_program_card(program)
+with tab_copybooks:
+
+    created_count, progress_count = count_status(COPYBOOKS)
+    record_count = count_by_type(COPYBOOKS, "RECORD")
+    select_count = count_by_type(COPYBOOKS, "SELECT")
+    status_count = count_by_type(COPYBOOKS, "STATUS")
+
+    render_kpi_grid(
+        [
+            ("Copybooks", len(COPYBOOKS)),
+            ("Record", record_count),
+            ("Select", select_count),
+            ("Status", status_count),
+            ("Created", created_count),
+            ("In Progress", progress_count),
+        ]
+    )
+
+    render_section_title("Copybook Catalog")
+
+    for copybook in COPYBOOKS:
+        render_source_card(copybook, "badge-copybook")
+
+
+# -----------------------------------------------------------------------------
+# TAB 3 - BUSINESS RULES
+# -----------------------------------------------------------------------------
+
+with tab_rules:
+
+    created_count, progress_count = count_status(BUSINESS_RULES)
+    rule_families = len({rule["type"] for rule in BUSINESS_RULES})
+
+    render_kpi_grid(
+        [
+            ("Business Rules", len(BUSINESS_RULES)),
+            ("Families", rule_families),
+            ("Created", created_count),
+            ("In Progress", progress_count),
+        ]
+    )
+
+    render_section_title("Business Rule Catalog")
+
+    for rule in BUSINESS_RULES:
+        render_source_card(rule, "badge-rule")
