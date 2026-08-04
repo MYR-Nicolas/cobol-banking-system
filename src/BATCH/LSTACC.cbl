@@ -1,33 +1,33 @@
-       IDENTIFICATION DIVISION.
-       PROGRAM-ID. LSTCPT.
 
       * ---------------------------------------
       * PROGRAM-ID  : LSTCPT
       * AUTHOR      : N-MAYEUR
       * DATE-WRITEN : 20260609
       * OBJECT      : List all accounts.
-      * VERSION     : v1.0
+      * VERSION     : v2.0
       * ---------------------------------------
       * VERSION HISTORY
       * v1.0 09/06/2026 initialization.
+      * v2.0 2026/08/04 optimization with implementation copybook.
       * ---------------------------------------
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. LSTACC.
+
 
        ENVIRONMENT DIVISION.
+
+
        INPUT-OUTPUT SECTION.
        FILE-CONTROL.
-           SELECT ACCOUNT-FILE
-           ASSIGN TO "data/accounts_ksds.dat"
-           ORGANIZATION IS LINE SEQUENTIAL.
+           COPY SEL-ACC.
 
        DATA DIVISION.
        FILE SECTION.
-       FD ACCOUNT-FILE.
+       FD  ACCOUNTS-KSDS.
            COPY ACCOUNT.
 
        WORKING-STORAGE SECTION.
-       01 WS-EOF-FLAG       PIC X VALUE 'N'.
-           88 END-OF-FILE   VALUE 'Y'.
-           88 NOT-END       VALUE 'N'.
+           COPY WS-FILE-STATUS.
 
        PROCEDURE DIVISION.
 
@@ -36,27 +36,30 @@
            PERFORM 1000-INITIALIZE
            PERFORM 2000-PROC-LIST
            PERFORM 4000-END-PROG
-           
+
            STOP RUN.
 
        1000-INITIALIZE.
 
-           MOVE 'N' TO WS-EOF-FLAG.
-       
+           MOVE SPACES TO WS-ACCOUNTS-STATUS.
+
        2000-PROC-LIST.
 
-           OPEN INPUT ACCOUNT-FILE
+           OPEN INPUT ACCOUNTS-KSDS
 
-           PERFORM UNTIL END-OF-FILE
-            READ ACCOUNT-FILE
-              AT END
-                 MOVE 'Y' TO WS-EOF-FLAG
-              NOT AT END
-                 PERFORM 3000-DISPLAY-LIST
-      
-           END-READ
-           END-PERFORM.
-          
+           IF NOT ACCOUNTS-OK
+               DISPLAY "ERROR OPENING ACCOUNTS-KSDS - STATUS: "
+                       WS-ACCOUNTS-STATUS
+           ELSE
+               PERFORM UNTIL ACCOUNTS-EOF
+                   READ ACCOUNTS-KSDS
+                       AT END
+                           CONTINUE
+                       NOT AT END
+                           PERFORM 3000-DISPLAY-LIST
+                   END-READ
+               END-PERFORM
+           END-IF.
 
        3000-DISPLAY-LIST.
 
@@ -71,10 +74,10 @@
 
        4000-END-PROG.
 
-           CLOSE ACCOUNT-FILE
+           IF ACCOUNTS-OK OR ACCOUNTS-EOF
+               CLOSE ACCOUNTS-KSDS
+           END-IF
 
            DISPLAY "======================================"
            DISPLAY "END OF PROCESSING"
            DISPLAY "======================================".
-
-          
