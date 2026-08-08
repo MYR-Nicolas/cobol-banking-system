@@ -1,6 +1,6 @@
 
       * ---------------------------------------
-      * PROGRAM-ID  : LSTCPT
+      * PROGRAM-ID  : LSTACC
       * AUTHOR      : N-MAYEUR
       * DATE-WRITEN : 20260609
       * OBJECT      : List all accounts.
