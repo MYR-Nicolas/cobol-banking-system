@@ -3,9 +3,9 @@
 #              of the cobol-core-banking-system project with GnuCOBOL.
 #
 # Usage:
-#   ./scripts/compile.sh              # compile everything (subprograms + programs)
-#   ./scripts/compile.sh LSTACC       # compile only the LSTACC program
-#   ./scripts/compile.sh --clean      # clean bin/ before compiling
+#   ./scripts-bash/COMPILE.sh              # compile everything (subprograms + programs)
+#   ./scripts-bash/COMPILE.sh LSTACC       # compile only the LSTACC program
+#   ./scripts-bash/COMPILE.sh --clean      # clean bin/ before compiling
 
 set -euo pipefail
 
@@ -14,7 +14,7 @@ PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 SRC_BATCH="$PROJECT_ROOT/src/BATCH"
 SRC_CICS="$PROJECT_ROOT/src/CICS"
 SRC_SUBPROGRAMS="$PROJECT_ROOT/src/subprograms"
-COPYBOOKS_DIR="$PROJECT_ROOT/src/copybooks"
+COPYBOOKS_DIR="$PROJECT_ROOT/copybooks"
 BIN_DIR="$PROJECT_ROOT/bin"
 LOG_DIR="$PROJECT_ROOT/logs"
 
