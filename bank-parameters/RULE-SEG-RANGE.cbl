@@ -20,11 +20,11 @@
       *
       *****************************************************************
        IDENTIFICATION DIVISION.
-       PROGRAM-ID  RULE-SEG-RANGE.
-       AUTHOR NMAYEUR.
-       INSTALLATION COBOL DEVELOPMENT CENTER.
-       DATE-WRITTEN 2026/08/02.
-       SECURITY NON-CONFIDENTIAL.
+       PROGRAM-ID.  RULE-SEG-RANGE.
+       AUTHOR. NMAYEUR.
+       INSTALLATION. COBOL DEVELOPMENT CENTER.
+       DATE-WRITTEN. 2026/08/02.
+       SECURITY. NON-CONFIDENTIAL.
       *****************************************************************
 
        ENVIRONMENT DIVISION.

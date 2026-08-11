@@ -13,7 +13,7 @@ set -euo pipefail
 PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 SRC_BATCH="$PROJECT_ROOT/src/BATCH"
 SRC_CICS="$PROJECT_ROOT/src/CICS"
-SRC_SUBPROGRAMS="$PROJECT_ROOT/src/subprograms"
+SRC_SUBPROGRAMS="$PROJECT_ROOT/bank-parameters"
 COPYBOOKS_DIR="$PROJECT_ROOT/copybooks"
 BIN_DIR="$PROJECT_ROOT/bin"
 LOG_DIR="$PROJECT_ROOT/logs"

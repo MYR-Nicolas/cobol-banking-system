@@ -16,11 +16,11 @@
       *
       *****************************************************************
        IDENTIFICATION DIVISION.
-       PROGRAM-ID  RULE-WITHDRAWAL.
-       AUTHOR NMAYEUR.
-       INSTALLATION COBOL DEVELOPMENT CENTER.
-       DATE-WRITTEN 2026/08/03.
-       SECURITY NON-CONFIDENTIAL.
+       PROGRAM-ID.  RULE-WITHDRAWAL.
+       AUTHOR. NMAYEUR.
+       INSTALLATION. COBOL DEVELOPMENT CENTER.
+       DATE-WRITTEN. 2026/08/03.
+       SECURITY. NON-CONFIDENTIAL.
       *****************************************************************
 
        ENVIRONMENT DIVISION.
