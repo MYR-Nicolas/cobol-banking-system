@@ -34,7 +34,6 @@
        01  LK-SEG-VALUE-CHECK            PIC S9(11)V99 COMP-3.
        01  LK-SELECT-MAX-BALANCE         PIC S9(11)V99.
 
-       COPY SEG-CUSTOMER.
 
       *-----------------------------------------------------------------
       * Output - result flag
@@ -45,7 +44,6 @@
 
        PROCEDURE DIVISION USING LK-SEG-VALUE-CHECK
                                  LK-SELECT-MAX-BALANCE
-                                 SEG-PARAM-RECORD
                                  LK-BALANCE-FLAG.
 
        MAIN.
