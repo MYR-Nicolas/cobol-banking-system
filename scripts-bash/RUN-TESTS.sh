@@ -26,7 +26,11 @@ GREEN='\033[0;32m'; RED='\033[0;31m'; YELLOW='\033[1;33m'; BOLD='\033[1m'; NC='\
 
 mkdir -p "$BIN_DIR" "$LOG_DIR"
 
-export COB_FILE_PATH="$DATA_DIR/vsam"
+# COB_FILE_PATH: GnuCOBOL searches each directory listed here (colon-separated)
+# for any relative filename used in ASSIGN TO "...".
+#   - $DATA_DIR/vsam   -> VSAM files (ACCOUNTS, CUSTOMERS, TRANSACTIONS, ...)
+#   - $TESTS_DIR/input -> CSV test-case input files (e.g. test-balance-cases.csv)
+export COB_FILE_PATH="$DATA_DIR/vsam:$TESTS_DIR/input"
 export COB_LIBRARY_PATH="$BIN_DIR"
 
 total_pass=0
@@ -62,10 +66,17 @@ run_one_test() {
   pass_count=$(grep -c "PASS" <<< "$output" || true)
   fail_count=$(grep -c "FAIL" <<< "$output" || true)
 
+  if [[ $pass_count -eq 0 && $fail_count -eq 0 ]]; then
+    echo -e "${RED}[NO RESULTS]${NC} $name — no PASS/FAIL detected in output"
+    failed_tests+=("$name (no test results detected)")
+    total_fail=$((total_fail + 1))
+    return
+  fi
+
   total_pass=$((total_pass + pass_count))
   total_fail=$((total_fail + fail_count))
 
-  echo "$output" | grep -E "PASS|FAIL" || echo "  (no PASS/FAIL line detected)"
+  echo "$output" | grep -E "PASS|FAIL"
 
   if [[ $fail_count -gt 0 ]]; then
     failed_tests+=("$name ($fail_count failing case(s))")
