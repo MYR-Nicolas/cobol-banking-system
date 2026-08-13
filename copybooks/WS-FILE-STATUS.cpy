@@ -45,3 +45,7 @@
                88  PARAMSEG-EOF                VALUE '10'.
                88  PARAMSEG-INVALID-KEY        VALUE '21' '23'.
                
+           05  WS-TESTCASE-STATUS          PIC X(02).
+               88  TESTCASE-OK                 VALUE '00'.
+               88  TESTCASE-EOF                VALUE '10'.
+               88  TESTCASE-NOT-FOUND          VALUE '35'.
