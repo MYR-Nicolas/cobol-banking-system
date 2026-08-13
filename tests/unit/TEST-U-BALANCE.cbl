@@ -6,7 +6,9 @@
       * Date      Author        Maintenance Requirement
       * --------- ------------  ---------------------------------------
       * 13/08/26  NMAYEUR       Initial version
-      *
+      * 13/08/26  NMAYEUR       V2 switch test data source to CSV
+      *                         file; add coverage for all customer
+      *                         segments
       *****************************************************************
       * Purpose :
       *
@@ -22,90 +24,109 @@
       *****************************************************************
 
        ENVIRONMENT DIVISION.
+       INPUT-OUTPUT SECTION.
+
+       FILE-CONTROL.
+           SELECT TEST-CASE-FILE 
+               ASSIGN TO "/workspaces/cobol-banking-system/tests/input/t
+      -    "est-balance-cases.csv"
+               ORGANIZATION IS LINE SEQUENTIAL
+               FILE STATUS IS WS-TESTCASE-STATUS.
 
        DATA DIVISION.
+       FILE SECTION.
+       FD  TEST-CASE-FILE.
+       01  WS-CSV-LINE                 PIC X(100).
+
        WORKING-STORAGE SECTION.
 
-       01  WS-TEST-CASES.
-           05  WS-T-COUNT              PIC 9(3) VALUE 3.
-           05  WS-T-TABLE OCCURS 3 TIMES.
-               10  WS-T-LABEL          PIC X(30).
-               10  WS-T-NEW-SOLD       PIC S9(11)V99 COMP-3.
-               10  WS-T-MAX-SEG        PIC S9(11)V99.
-               10  WS-T-EXPECTED-FLAG  PIC X.
+           COPY WS-FILE-STATUS.
 
-       01  WS-IDX                      PIC 9(3).
-       01  WS-ACTUAL-FLAG              PIC X.
-       01  WS-PASS-COUNT               PIC 9(3) VALUE 0.
-       01  WS-FAIL-COUNT               PIC 9(3) VALUE 0.
+       01  WS-EOF-FLAG                 PIC X VALUE "N".
+           88  WS-EOF                  VALUE "Y".
 
-       01  WS-T-NEW-SOLD-DISPLAY       PIC -Z(9)9.99.
-       01  WS-T-MAX-SEG-DISPLAY        PIC -Z(9)9.99.
+       01  WS-LINE-COUNT               PIC 9(3) VALUE 0.
+
+       01  WS-CSV-FIELDS.
+           05  WS-CSV-LABEL            PIC X(30).
+           05  WS-CSV-SEGMENT          PIC X(10).
+           05  WS-CSV-NEW-SOLD-X       PIC X(15).
+           05  WS-CSV-MAX-SEG-X        PIC X(15).
+           05  WS-CSV-EXPECTED         PIC X.
+
+       01  WS-T-NEW-SOLD                PIC S9(11)V99 COMP-3.
+       01  WS-T-MAX-SEG                 PIC S9(11)V99.
+       01  WS-ACTUAL-FLAG               PIC X.
+       01  WS-PASS-COUNT                PIC 9(3) VALUE 0.
+       01  WS-FAIL-COUNT                PIC 9(3) VALUE 0.
+
+       01  WS-T-NEW-SOLD-DISPLAY        PIC -Z(9)9.99.
+       01  WS-T-MAX-SEG-DISPLAY         PIC -Z(9)9.99.
 
 
        PROCEDURE DIVISION.
 
        MAIN.
 
-           PERFORM INIT-TEST-CASES.
-           PERFORM RUN-ALL-TESTS.
-           PERFORM DISPLAY-SUMMARY.
+           OPEN INPUT TEST-CASE-FILE
+           IF NOT TESTCASE-OK
+               DISPLAY "ERROR OPENING CSV: " WS-TESTCASE-STATUS
+               GOBACK
+           END-IF
 
+           READ TEST-CASE-FILE
+               AT END SET WS-EOF TO TRUE
+           END-READ
+
+           PERFORM UNTIL WS-EOF
+               READ TEST-CASE-FILE
+                   AT END SET WS-EOF TO TRUE
+                   NOT AT END
+                       ADD 1 TO WS-LINE-COUNT
+                       PERFORM RUN-TEST
+               END-READ
+           END-PERFORM
+
+           CLOSE TEST-CASE-FILE
+           PERFORM DISPLAY-SUMMARY
            GOBACK.
 
-      *-----------------------------------------------------------------
-      * Test cases
-      *-----------------------------------------------------------------
-       INIT-TEST-CASES.
+ 
+       RUN-TEST.
 
-      * New sold exceeds limit
-           MOVE "New sold exceeds limit" TO WS-T-LABEL(1).
-           MOVE 20000.01                 TO WS-T-NEW-SOLD(1).
-           MOVE 20000.00                 TO WS-T-MAX-SEG(1).
-           MOVE "N"                      TO WS-T-EXPECTED-FLAG(1).
+           UNSTRING WS-CSV-LINE DELIMITED BY ","
+               INTO WS-CSV-LABEL
+                    WS-CSV-SEGMENT
+                    WS-CSV-NEW-SOLD-X
+                    WS-CSV-MAX-SEG-X
+                    WS-CSV-EXPECTED
+           END-UNSTRING
 
-      * New sold equal limit
-           MOVE "New sold equal limit"   TO WS-T-LABEL(2).
-           MOVE 20000.00                 TO WS-T-NEW-SOLD(2).
-           MOVE 20000.00                 TO WS-T-MAX-SEG(2).
-           MOVE "Y"                      TO WS-T-EXPECTED-FLAG(2).
+           MOVE FUNCTION NUMVAL(WS-CSV-NEW-SOLD-X) TO WS-T-NEW-SOLD
+           MOVE FUNCTION NUMVAL(WS-CSV-MAX-SEG-X)  TO WS-T-MAX-SEG
+           MOVE WS-T-NEW-SOLD TO WS-T-NEW-SOLD-DISPLAY
+           MOVE WS-T-MAX-SEG  TO WS-T-MAX-SEG-DISPLAY
 
-      * New sold under limit
-           MOVE "New sold under limit"   TO WS-T-LABEL(3).
-           MOVE 19999.99                 TO WS-T-NEW-SOLD(3).
-           MOVE 20000.00                 TO WS-T-MAX-SEG(3).
-           MOVE "Y"                      TO WS-T-EXPECTED-FLAG(3).
+           CALL "RULE-BALANCE" USING
+               WS-T-NEW-SOLD
+               WS-T-MAX-SEG
+               WS-ACTUAL-FLAG
 
-       RUN-ALL-TESTS.
-
-           PERFORM VARYING WS-IDX FROM 1 BY 1
-               UNTIL WS-IDX > WS-T-COUNT
-
-               CALL "RULE-BALANCE" USING
-                   WS-T-NEW-SOLD(WS-IDX)
-                   WS-T-MAX-SEG(WS-IDX)
-                   WS-ACTUAL-FLAG
-
-               MOVE WS-T-NEW-SOLD(WS-IDX) TO WS-T-NEW-SOLD-DISPLAY
-               MOVE WS-T-MAX-SEG(WS-IDX)  TO WS-T-MAX-SEG-DISPLAY
-
-               IF WS-ACTUAL-FLAG = WS-T-EXPECTED-FLAG(WS-IDX)
-                   ADD 1 TO WS-PASS-COUNT
-                   DISPLAY "[PASS] " WS-T-LABEL(WS-IDX)
-                       " | new sold=" WS-T-NEW-SOLD-DISPLAY
-                       " | max seg=" WS-T-MAX-SEG-DISPLAY
-                       " | expected=" WS-T-EXPECTED-FLAG(WS-IDX)
-                       " actual=" WS-ACTUAL-FLAG
-               ELSE
-                   ADD 1 TO WS-FAIL-COUNT
-                   DISPLAY "[FAIL] " WS-T-LABEL(WS-IDX)
-                       " | new sold=" WS-T-NEW-SOLD-DISPLAY
-                       " | max seg=" WS-T-MAX-SEG-DISPLAY
-                       " | expected=" WS-T-EXPECTED-FLAG(WS-IDX)
-                       " actual=" WS-ACTUAL-FLAG
-               END-IF
-
-           END-PERFORM.
+           IF WS-ACTUAL-FLAG = WS-CSV-EXPECTED
+               ADD 1 TO WS-PASS-COUNT
+               DISPLAY "[PASS] " WS-CSV-SEGMENT " - " WS-CSV-LABEL
+                   " | new sold=" WS-T-NEW-SOLD-DISPLAY
+                   " | max seg=" WS-T-MAX-SEG-DISPLAY
+                   " | expected=" WS-CSV-EXPECTED
+                   " actual=" WS-ACTUAL-FLAG
+           ELSE
+               ADD 1 TO WS-FAIL-COUNT
+               DISPLAY "[FAIL] " WS-CSV-SEGMENT " - " WS-CSV-LABEL
+                   " | new sold=" WS-T-NEW-SOLD-DISPLAY
+                   " | max seg=" WS-T-MAX-SEG-DISPLAY
+                   " | expected=" WS-CSV-EXPECTED
+                   " actual=" WS-ACTUAL-FLAG
+           END-IF.
 
       *-----------------------------------------------------------------
       * Final report
@@ -115,7 +136,7 @@
            DISPLAY " ".
            DISPLAY "=========================================".
            DISPLAY "TEST-U-BALANCE SUMMARY".
-           DISPLAY "  Total cases : " WS-T-COUNT.
+           DISPLAY "  Total cases : " WS-LINE-COUNT.
            DISPLAY "  Passed      : " WS-PASS-COUNT.
            DISPLAY "  Failed      : " WS-FAIL-COUNT.
            DISPLAY "=========================================".
