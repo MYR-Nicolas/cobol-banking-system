@@ -21,11 +21,11 @@
            05  TRX-ID              PIC X(09).
            05  TRX-DATE            PIC 9(08).
            05  TRX-TYPE            PIC X(08).
-               88  TRX-TRANSFER        VALUE 'VIREMENT'.
-               88  TRX-DEPOSIT         VALUE 'DEPOT'.
-               88  TRX-WITHDRAWAL      VALUE 'RETRAIT'.
-               88  TRX-TYPE-VALID      VALUE 'VIREMENT' 'DEPOT' 
-                                             'RETRAIT'.
+               88  TRX-TRANSFER        VALUE 'TRANSFER'.
+               88  TRX-DEPOSIT         VALUE 'DEPOSIT'.
+               88  TRX-WITHDRAWAL      VALUE 'WITHDRAW'.
+               88  TRX-TYPE-VALID      VALUE 'TRANSFER' 'DEPOSIT' 
+                                             'WITHDRAW'.
            05  TRX-ACC-FROM        PIC X(10).
            05  TRX-ACC-TO          PIC X(10).
                88  TRX-ACC-TO-EMPTY    VALUE SPACES.
