@@ -257,16 +257,40 @@ evolutions = [
     },
     {
         "title": "Business rule creation and integration into COBOL programs",
-        "status": "progress",
+        "status": "done",
         "desc": (
             "Define, structure and integrate banking business rules directly "
-            "into the COBOL application flow. The current scope covers "
-            "LSTACC, CNSACC and DEPOSIT, with validation logic progressively "
-            "added to improve account listing, account consultation and deposit "
-            "processing. These rules are designed to strengthen data consistency, "
-            "functional control and maintainability across the banking system."
+            "into the COBOL application flow. The scope covers LSTACC, CNSACC "
+            "and DEPOSIT, with validation logic added to strengthen account "
+            "listing, account consultation and deposit processing. These rules "
+            "reinforce data consistency, functional control and maintainability "
+            "across the banking system."
         ),
         "tags": ["Business Rules", "LSTACC", "CNSACC", "DEPOSIT", "Validation"],
+    },
+    {
+        "title": "Unit testing of banking business rules",
+        "status": "done",
+        "desc": (
+            "Build CSV-driven unit test drivers covering the RULE-* "
+            "subprograms (RULE-SEG-RANGE, RULE-BALANCE, RULE-WITHDRAWAL, "
+            "RULE-FORMAT, RULE-ACCOUNT-CTRL) to validate the business rules "
+            "integrated into LSTACC, CNSACC and DEPOSIT. This evolution "
+            "secures the rules engine against regressions and confirms "
+            "expected behavior across the tested scenarios."
+        ),
+        "tags": ["Unit Tests", "RULE-*", "CSV Driver", "Quality"],
+    },
+    {
+        "title": "Enhancement of existing core programs and new feature development",
+        "status": "progress",
+        "desc": (
+            "Improve the functionalities of the existing core programs "
+            "(LSTACC, CNSACC, DEPOSIT) while starting the design and "
+            "development of additional banking features to extend the "
+            "system's functional coverage."
+        ),
+        "tags": ["Enhancements", "New Features", "Core Programs"],
     },
 ]
 
