@@ -176,6 +176,12 @@ GLOBAL_CSS = """
     border: 1px solid #fecaca;
 }
 
+.badge-test {
+    background: #f5f3ff;
+    color: #5b21b6;
+    border: 1px solid #ddd6fe;
+}
+
 .badge-neutral {
     background: #f8fafc;
     color: #475569;
@@ -449,6 +455,59 @@ BUSINESS_RULES = [
 
 
 # =============================================================================
+# UNIT TEST DRIVER DEFINITIONS
+# Catalog of the unit test drivers validating the business rule modules.
+#
+# Each driver lives under tests/unit/ and exercises one RULE-*.cbl module
+# through a CSV-driven set of test cases (input files are not shown here,
+# only the COBOL test driver source itself).
+# =============================================================================
+
+UNIT_TESTS = [
+    {
+        "title": "TEST-U-ACC - Account Control Unit Test",
+        "rule_id": "BR-ACC-001",
+        "filename": "TEST-U-ACC.cbl",
+        "type": "Account",
+        "path": "tests/unit/TEST-U-ACC.cbl",
+        "description": "CSV-driven unit test driver validating RULE-ACCOUNT-CTRL (BR-ACC-001) account eligibility control.",
+    },
+    {
+        "title": "TEST-U-BALANCE - Maximum Balance Unit Test",
+        "rule_id": "BR-BAL-002",
+        "filename": "TEST-U-BALANCE.cbl",
+        "type": "Balance",
+        "path": "tests/unit/TEST-U-BALANCE.cbl",
+        "description": "CSV-driven unit test driver validating RULE-BALANCE (BR-BAL-002) maximum balance control.",
+    },
+    {
+        "title": "TEST-U-FORMAT - Format Control Unit Test",
+        "rule_id": "BR-FMT-001",
+        "filename": "TEST-U-FORMAT.cbl",
+        "type": "Format",
+        "path": "tests/unit/TEST-U-FORMAT.cbl",
+        "description": "CSV-driven unit test driver validating RULE-FORMAT (BR-FMT-001) input field format control.",
+    },
+    {
+        "title": "TEST-U-SEG-RANGE - Segment Range Unit Test",
+        "rule_id": "BR-SEG-001",
+        "filename": "TEST-U-SEG-RANGE.cbl",
+        "type": "Segment",
+        "path": "tests/unit/TEST-U-SEG-RANGE.cbl",
+        "description": "CSV-driven unit test driver validating RULE-SEG-RANGE (BR-SEG-001) segment range control.",
+    },
+    {
+        "title": "TEST-U-WD - Withdrawal Limit Unit Test",
+        "rule_id": "BR-LIM-001",
+        "filename": "TEST-U-WD.cbl",
+        "type": "Limit",
+        "path": "tests/unit/TEST-U-WD.cbl",
+        "description": "CSV-driven unit test driver validating RULE-WITHDRAWAL (BR-LIM-001) monthly withdrawal limit control.",
+    },
+]
+
+
+# =============================================================================
 # PATH RESOLUTION
 # Source paths are resolved against the project root, not against the current
 # working directory. Streamlit is often launched from a different folder than
@@ -516,7 +575,8 @@ def get_source_status(source_path: str) -> tuple[Path | None, bool, str, str]:
     """
     Return the implementation status of a COBOL source artifact.
 
-    Works for any source artifact: program, copybook or business rule module.
+    Works for any source artifact: program, copybook, business rule module
+    or unit test driver.
 
     Parameters
     ----------
@@ -713,8 +773,9 @@ st.markdown(
         <p style="font-size:0.95rem; opacity:0.9; line-height:1.7; margin-top:1rem; margin-bottom:1rem;">
             This page presents the COBOL artifacts created for the banking simulation project:
             programs organized under src/BATCH and src/CICS, copybooks shared across modules,
-            and business rules implemented as external subprograms. Each entry includes its
-            functional role, implementation status and source code preview.
+            business rules implemented as external subprograms, and the unit test drivers
+            validating those rules. Each entry includes its functional role, implementation
+            status and source code preview.
         </p>
         <div>
             <span class="badge" style="background:rgba(255,255,255,0.12); color:white; border-color:rgba(255,255,255,0.3);">COBOL</span>
@@ -723,6 +784,7 @@ st.markdown(
             <span class="badge" style="background:rgba(255,255,255,0.12); color:white; border-color:rgba(255,255,255,0.3);">VSAM KSDS</span>
             <span class="badge" style="background:rgba(255,255,255,0.12); color:white; border-color:rgba(255,255,255,0.3);">Copybooks</span>
             <span class="badge" style="background:rgba(255,255,255,0.12); color:white; border-color:rgba(255,255,255,0.3);">Business Rules</span>
+            <span class="badge" style="background:rgba(255,255,255,0.12); color:white; border-color:rgba(255,255,255,0.3);">Unit Tests</span>
         </div>
     </div>
     """,
@@ -732,12 +794,12 @@ st.markdown(
 
 # =============================================================================
 # TAB LAYOUT
-# One tab per artifact family: Programs, Copybooks, Business Rules.
+# One tab per artifact family: Programs, Copybooks, Business Rules, Tests.
 # Each tab reuses the same KPI grid + card catalog layout.
 # =============================================================================
 
-tab_programs, tab_copybooks, tab_rules = st.tabs(
-    ["Programs", "Copybooks", "Business Rules"]
+tab_programs, tab_copybooks, tab_rules, tab_tests = st.tabs(
+    ["Programs", "Copybooks", "Business Rules", "Tests"]
 )
 
 
@@ -758,6 +820,20 @@ with tab_programs:
             They remain structured as a CICS-oriented simulation and are planned to
             evolve toward true online transaction processing when a compatible
             mainframe/CICS runtime is available.
+          </div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+    st.markdown(
+        """
+        <div class="constraint-warning">
+          <div class="constraint-warning-title">Programs Under Rework</div>
+          <div class="constraint-warning-text">
+            Programs are currently being reworked to integrate the shared
+            copybooks and business rule modules, so their source code may
+            change frequently over the coming iterations.
           </div>
         </div>
         """,
@@ -837,3 +913,29 @@ with tab_rules:
 
     for rule in BUSINESS_RULES:
         render_source_card(rule, "badge-rule")
+
+
+# -----------------------------------------------------------------------------
+# TAB 4 - TESTS
+# Unit test drivers only (CSV test data and run logs are intentionally
+# not displayed on this page).
+# -----------------------------------------------------------------------------
+
+with tab_tests:
+
+    created_count, progress_count = count_status(UNIT_TESTS)
+    tested_rules = len({test["rule_id"] for test in UNIT_TESTS})
+
+    render_kpi_grid(
+        [
+            ("Unit Tests", len(UNIT_TESTS)),
+            ("Rules Covered", tested_rules),
+            ("Created", created_count),
+            ("In Progress", progress_count),
+        ]
+    )
+
+    render_section_title("Unit Test Driver Catalog")
+
+    for test in UNIT_TESTS:
+        render_source_card(test, "badge-test")
